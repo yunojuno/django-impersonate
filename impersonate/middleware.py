@@ -11,10 +11,10 @@ class ImpersonateMiddleware(object):
             new_user_id = request.session['_impersonate']
             if isinstance(new_user_id, User):
                 # Edge case for issue 15
-                new_user_id = new_user_id.id
+                new_user_id = new_user_id.pk
 
             try:
-                new_user = User.objects.get(id=new_user_id)
+                new_user = User.objects.get(pk=new_user_id)
             except User.DoesNotExist:
                 return
 

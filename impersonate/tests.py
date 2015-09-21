@@ -132,7 +132,7 @@ class TestMiddleware(TestCase):
         request = self.factory.get('/')
         request.user = self.superuser
         request.session = {
-            '_impersonate': self.user.id if use_id else self.user,
+            '_impersonate': self.user.pk if use_id else self.user,
         }
         self.middleware.process_request(request)
 
