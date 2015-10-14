@@ -14,11 +14,11 @@
 {% endif %}
 
 {% if page.has_previous %}
-<a href="?page={{ page.previous_page_number }}">Previous Page</a> &nbsp; 
+<a href="{% url 'impersonate-list' %}?page={{ page.previous_page_number }}">Previous Page</a> &nbsp; 
 {% endif %}
 
 {% if page.has_next %}
-<a href="?page={{ page.next_page_number }}">Next Page</a> &nbsp; 
+<a href="{% url 'impersonate-list' %}?page={{ page.next_page_number }}">Next Page</a> &nbsp; 
 {% endif %}
 
 </body>
