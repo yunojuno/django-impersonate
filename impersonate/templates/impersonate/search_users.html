@@ -21,11 +21,11 @@ Enter Search Query:<br />
 {% endif %}
 
 {% if query and page.has_previous %}
-<a href="?page={{ page.previous_page_number }}&q={{ query|urlencode }}">Previous Page</a> &nbsp; 
+<a href="{% url 'impersonate-search' %}?page={{ page.previous_page_number }}&q={{ query|urlencode }}">Previous Page</a> &nbsp; 
 {% endif %}
 
 {% if query and page.has_next %}
-<a href="?page={{ page.next_page_number }}&q={{ query|urlencode }}">Next Page</a> &nbsp; 
+<a href="{% url 'impersonate-search' %}?page={{ page.next_page_number }}&q={{ query|urlencode }}">Next Page</a> &nbsp; 
 {% endif %}
 
 </body>
