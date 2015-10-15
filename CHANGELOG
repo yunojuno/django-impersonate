@@ -1,6 +1,10 @@
 Changes
 -------
 
+0.9.3 (DEV...)
+
+- Use proper URL tag for user search, listing templates. (Pull Requests #21, #22)
+
 0.9.2 (2015-08-24)
 
 - Add http refer specific setting because it broke prevoius usage. (Issue #24, Refs Issue #17)
