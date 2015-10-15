@@ -246,7 +246,7 @@ class TestImpersonation(TestCase):
             self.assertIsNone(sender)
             self.assertIsNotNone(kwargs.pop('request', None))
             self.assertEqual(kwargs.pop('impersonator').username, 'user1')
-            impersonating = User.objects.get(id=kwargs.pop('impersonating'))
+            impersonating = User.objects.get(pk=kwargs.pop('impersonating'))
             self.assertEqual(impersonating.username, 'user4')
 
         self.assertFalse(self.session_begin_fired)
@@ -279,7 +279,7 @@ class TestImpersonation(TestCase):
     def test_successful_impersonation_of_superuser(self):
         response = self._impersonate_helper('user1', 'foobar', 2)
         self.assertEqual(self.client.session.get('_impersonate'), 2)
-        user = User.objects.get(id=self.client.session.get('_impersonate'))
+        user = User.objects.get(pk=self.client.session.get('_impersonate'))
         self.assertTrue(user.is_superuser)
         self.client.get(reverse('impersonate-stop'))
         self.assertEqual(self.client.session.get('_impersonate'), None)
