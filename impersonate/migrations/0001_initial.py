@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
             name='ImpersonationLog',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('session_key', models.CharField(help_text=b'The Django session request key.', max_length=b'100')),
+                ('session_key', models.CharField(help_text=b'The Django session request key.', max_length=b'40')),
                 ('session_started_at', models.DateTimeField(help_text=b'The time impersonation began.', null=True, blank=True)),
                 ('session_ended_at', models.DateTimeField(help_text=b'The time impersonation ended.', null=True, blank=True)),
                 ('duration', models.DurationField(help_text=b'Time spent impersonating.', null=True, blank=True)),

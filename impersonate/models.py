@@ -38,7 +38,7 @@ class ImpersonationLog(models.Model):
         help_text="The user being impersonated."
     )
     session_key = models.CharField(
-        max_length="100",
+        max_length="40",
         help_text="The Django session request key."
     )
     session_started_at = models.DateTimeField(
@@ -84,8 +84,9 @@ def on_session_begin(sender, **kwargs):
 def on_session_end(sender, **kwargs):
     """Update ImpersonationLog with the end timestamp.
 
-    This function relies on the request.session.session_key being the
-    same as that used to create the original log.
+    This uses the combination of session_key, impersonator and
+    user being impersonated to look up the corresponding impersonation
+    log object.
 
     """
     impersonator = kwargs.get('impersonator')
