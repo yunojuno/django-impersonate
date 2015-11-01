@@ -56,6 +56,9 @@ class ImpersonatorFilter(admin.SimpleListFilter):
     assumed that this is a small list of users - a subset of staff and
     superusers. There is no corresponding filter for users who have been
     impersonated, as this could be a very large set of users.
+    
+    If the number of unique impersonators exceeds MAX_FILTER_SIZE, then
+    the filter is removed (shows only 'All').
 
     """
 
@@ -70,7 +73,6 @@ class ImpersonatorFilter(admin.SimpleListFilter):
         impersonators = set([q.impersonator for q in qs])
         if len(impersonators) > MAX_FILTER_SIZE:
             logger.debug(
-                "Number of impersonators [%s] exceeds MAX_FILTER_SIZE, "
                 "Hiding admin list filter as number of impersonators "
                 "exceeds MAX_FILTER_SIZE [%s]",
                 len(impersonators),
