@@ -288,8 +288,8 @@ fields above. It is 'icontains' by default.
 
 A bool that can be used to disable the logging of impersonation sessions. By
 default each impersonation ``session_begin`` signal will create a new
-``ImpersonationLog`` object, which is closed out at the corresponding
-``session_end`` signal.
+``ImpersonationLog`` object, which is closed out (duration calculated) at
+the corresponding ``session_end`` signal.
 
 
 Testing
