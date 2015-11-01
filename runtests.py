@@ -26,6 +26,8 @@ settings.configure(
         'django.contrib.admin',
         APP_NAME,
     ),
+    # turn off for testing, override in logging-specific tests
+    IMPERSONATE_SESSION_LOGGING=False,
 )
 
 from django.test.utils import get_runner
