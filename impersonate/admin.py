@@ -29,6 +29,7 @@ class ImpersonationLogAdmin(admin.ModelAdmin):
         'session_ended_at',
         'duration'
     )
+    list_filter = ('session_started_at',)
 
     def impersonator_(self, obj):
         return friendly_name(obj.impersonator)
