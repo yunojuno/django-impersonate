@@ -27,7 +27,7 @@ settings.configure(
         APP_NAME,
     ),
     # turn off for testing, override in logging-specific tests
-    IMPERSONATE_SESSION_LOGGING=False,
+    IMPERSONATE_DISABLE_LOGGING=True,
 )
 
 from django.test.utils import get_runner
