@@ -79,7 +79,7 @@ class ImpersonatorFilter(admin.SimpleListFilter):
             return
 
         for i in impersonators:
-            yield (q.impersonator.id, friendly_name(q.impersonator))
+            yield (i.id, friendly_name(i))
 
     def queryset(self, request, queryset):
         if self.value() in (None, ''):
