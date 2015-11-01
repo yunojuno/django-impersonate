@@ -19,16 +19,20 @@
         is_superuser = False
         is_staff = False
 '''
+from collections import namedtuple
+
 from django.utils import six
 from django.test import TestCase
-from django.utils import unittest
-from django.dispatch import receiver
 from django.http import HttpResponse
 from django.core.urlresolvers import reverse
 from django.test.utils import override_settings
 from django.test.client import Client, RequestFactory
 from django.conf.urls import patterns, url, include
+
+import mock
+
 from .signals import session_begin, session_end
+from .models import ImpersonationLog, on_session_begin, on_session_end
 
 try:
     # Python 3
@@ -57,6 +61,10 @@ urlpatterns = patterns(
         name='another-test-view'),
     ('^', include('impersonate.urls')),
 )
+
+# simplistic mocking of request and session - used in ImpersonationLog tests
+ImpersonatedRequest = namedtuple('ImpersonatedRequest', 'user session')
+Session = namedtuple('Session', 'session_key')
 
 
 def test_view(request):
@@ -563,3 +571,74 @@ class TestImpersonation(TestCase):
         response = self.client.get(reverse('impersonate-list'))
         self.assertEqual(response.context['users'].count(), 4)
         self.client.logout()
+
+
+class TestImpersonationLog(TestCase):
+
+
+    def setUp(self):
+        self.superuser = UserFactory.create(
+            username='superuser',
+            is_superuser=True,
+        )
+        self.user = UserFactory.create(username='regular')
+        # self.factory = RequestFactory()
+        # self.middleware = ImpersonateMiddleware()
+
+    def _impersonated_request(self, use_id=True):
+        return ImpersonatedRequest(self.user, Session('foo'))
+
+    """Tests for the ImpersonationLog."""
+    @mock.patch('impersonate.models.DISABLE_SESSION_LOGGING', True)
+    def test_disable_logging(self):
+        self.assertFalse(ImpersonationLog.objects.exists())
+        request = self._impersonated_request()
+        on_session_begin(
+            sender=None,
+            impersonator=self.superuser,
+            impersonating=self.user,
+            request=request,
+        )
+        self.assertFalse(ImpersonationLog.objects.exists())
+
+    """Tests for the ImpersonationLog."""
+    @mock.patch('impersonate.models.DISABLE_SESSION_LOGGING', False)
+    def test_session_begin(self):
+        self.assertFalse(ImpersonationLog.objects.exists())
+        request = self._impersonated_request()
+        on_session_begin(
+            sender=None,
+            impersonator=self.superuser,
+            impersonating=self.user,
+            request=request,
+        )
+        # implicit assert that there is only one object
+        log = ImpersonationLog.objects.get()
+        self.assertEqual(log.impersonator, self.superuser)
+        self.assertEqual(log.impersonating, self.user)
+        self.assertIsNotNone(log.session_started_at)
+        self.assertIsNone(log.session_ended_at)
+        self.assertIsNone(log.duration)
+
+    @mock.patch('impersonate.models.DISABLE_SESSION_LOGGING', False)
+    def test_session_end(self):
+        self.assertFalse(ImpersonationLog.objects.exists())
+        request = self._impersonated_request()
+        on_session_begin(
+            sender=None,
+            impersonator=self.superuser,
+            impersonating=self.user,
+            request=request,
+        )
+        on_session_end(
+            sender=None,
+            impersonator=self.superuser,
+            impersonating=self.user,
+            request=request,
+        )
+        log = ImpersonationLog.objects.get()
+        self.assertEqual(log.impersonator, self.superuser)
+        self.assertEqual(log.impersonating, self.user)
+        self.assertIsNotNone(log.session_started_at)
+        self.assertIsNotNone(log.session_ended_at)
+        self.assertEqual(log.duration, log.session_ended_at - log.session_started_at)  # noqa
