@@ -1,4 +1,6 @@
+# -*- coding: utf-8 -*-
 import re
+
 from django.conf import settings
 from django.utils.safestring import mark_safe
 from django.core.paginator import Paginator, EmptyPage

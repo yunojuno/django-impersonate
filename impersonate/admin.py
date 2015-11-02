@@ -2,10 +2,10 @@
 """Admin models for impersonate app."""
 import logging
 
-from django.contrib import admin
 from django.conf import settings
+from django.contrib import admin
 
-from impersonate.models import ImpersonationLog
+from .models import ImpersonationLog
 
 logger = logging.getLogger(__name__)
 

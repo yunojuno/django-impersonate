@@ -20,14 +20,15 @@
         is_staff = False
 '''
 from collections import namedtuple
+import datetime
 
-from django.utils import six
-from django.test import TestCase
-from django.http import HttpResponse
-from django.core.urlresolvers import reverse
-from django.test.utils import override_settings
-from django.test.client import Client, RequestFactory
 from django.conf.urls import patterns, url, include
+from django.core.urlresolvers import reverse
+from django.http import HttpResponse
+from django.test import TestCase
+from django.test.client import Client, RequestFactory
+from django.test.utils import override_settings
+from django.utils import six, timezone
 
 import mock
 
@@ -65,6 +66,8 @@ urlpatterns = patterns(
 # simplistic mocking of request and session - used in ImpersonationLog tests
 MockRequest = namedtuple('MockRequest', 'user session')
 MockSession = namedtuple('MockSession', 'session_key')
+# fixed timestamp used to replace django.utils.timezone.now()
+MockNow = timezone.now()
 
 
 def test_view(request):
@@ -575,6 +578,7 @@ class TestImpersonation(TestCase):
 
 class TestImpersonationLog(TestCase):
 
+    """Tests for the ImpersonationLog model, and signal receivers"""
 
     def setUp(self):
         self.superuser = UserFactory.create(
@@ -585,7 +589,6 @@ class TestImpersonationLog(TestCase):
         self.session = MockSession('foo')
         self.request = MockRequest(self.user, self.session)
 
-    """Tests for the ImpersonationLog."""
     @mock.patch('impersonate.models.DISABLE_SESSION_LOGGING', True)
     def test_disable_logging(self):
         self.assertFalse(ImpersonationLog.objects.exists())
@@ -597,8 +600,8 @@ class TestImpersonationLog(TestCase):
         )
         self.assertFalse(ImpersonationLog.objects.exists())
 
-    """Tests for the ImpersonationLog."""
     @mock.patch('impersonate.models.DISABLE_SESSION_LOGGING', False)
+    @mock.patch('impersonate.models.tz_now', lambda: MockNow)
     def test_session_begin(self):
         self.assertFalse(ImpersonationLog.objects.exists())
         on_session_begin(
@@ -634,5 +637,5 @@ class TestImpersonationLog(TestCase):
         self.assertEqual(log.impersonator, self.superuser)
         self.assertEqual(log.impersonating, self.user)
         self.assertIsNotNone(log.session_started_at)
-        self.assertIsNotNone(log.session_ended_at)
+        self.assertTrue(log.session_ended_at > log.session_started_at)
         self.assertEqual(log.duration, log.session_ended_at - log.session_started_at)  # noqa
