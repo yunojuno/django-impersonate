@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
 from django.conf import settings
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
+
 from .decorators import allowed_user_required
 from .helpers import (
     get_redir_path, get_redir_arg, get_paginator, get_redir_field,

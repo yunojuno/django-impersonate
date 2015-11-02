@@ -8,7 +8,7 @@ from django.db import models
 from django.dispatch import receiver
 from django.utils.timezone import now as tz_now
 
-from impersonate.signals import session_begin, session_end
+from .signals import session_begin, session_end
 
 logger = logging.getLogger(__name__)
 
