@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""Impersonation models."""
+''' Impersonation app models.
+
+    Includes the ImpersonationLog model, that stores details of each
+    impersonation setting, and receiver functions that handle
+    session_begin and session_end signals.
+
+'''
 import logging
 
 from django.conf import settings
@@ -18,14 +24,14 @@ DISABLE_SESSION_LOGGING = getattr(settings, 'IMPERSONATE_DISABLE_LOGGING', False
 
 class ImpersonationLog(models.Model):
 
-    """Stores details of each impersonation session.
+    ''' Stores details of each impersonation session.
 
-    This model is used to persist details of impersonations to the local
-    database. It hooks in to the session_begin and session_end signals to
-    capture the details of the user impersonating and the user who is
-    being impersonated. It also stores the Django session key.
+        This model is used to persist details of impersonations. It hooks
+        in to the session_begin and session_end signals to capture the
+        details of the user impersonating and the user who is being
+        impersonated. It also stores the Django session key.
 
-    """
+    '''
 
     impersonator = models.ForeignKey(
         User,
@@ -62,7 +68,7 @@ class ImpersonationLog(models.Model):
 
 @receiver(session_begin)
 def on_session_begin(sender, **kwargs):
-    """Create a new ImpersonationLog object."""
+    '''Create a new ImpersonationLog object.'''
     impersonator = kwargs.get('impersonator')
     impersonating = kwargs.get('impersonating')
     session_key = kwargs.get('request').session.session_key
@@ -82,13 +88,13 @@ def on_session_begin(sender, **kwargs):
 
 @receiver(session_end)
 def on_session_end(sender, **kwargs):
-    """Update ImpersonationLog with the end timestamp.
+    ''' Update ImpersonationLog with the end timestamp.
 
-    This uses the combination of session_key, impersonator and
-    user being impersonated to look up the corresponding impersonation
-    log object.
+        This uses the combination of session_key, impersonator and
+        user being impersonated to look up the corresponding
+        impersonation log object.
 
-    """
+    '''
     impersonator = kwargs.get('impersonator')
     impersonating = kwargs.get('impersonating')
     session_key = kwargs.get('request').session.session_key
