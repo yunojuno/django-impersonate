@@ -578,7 +578,7 @@ class TestImpersonation(TestCase):
 
 class TestImpersonationLog(TestCase):
 
-    """Tests for the ImpersonationLog model, and signal receivers"""
+    ''' Tests for the ImpersonationLog model and signal receivers.'''
 
     def setUp(self):
         self.superuser = UserFactory.create(

@@ -1,5 +1,5 @@
 #  -*- coding: utf-8 -*-
-"""Admin models for impersonate app."""
+'''Admin models for impersonate app.'''
 import logging
 
 from django.conf import settings
@@ -13,7 +13,7 @@ MAX_FILTER_SIZE = getattr(settings, 'IMPERSONATE_MAX_FILTER_SIZE', 100)
 
 
 def friendly_name(user):
-    """Return proper name if exists, else username."""
+    '''Return proper name if exists, else username.'''
     if user.get_full_name() != '':
         return user.get_full_name()
     else:
@@ -22,13 +22,13 @@ def friendly_name(user):
 
 class SessionStateFilter(admin.SimpleListFilter):
 
-    """Custom admin filter based on the session state.
+    '''Custom admin filter based on the session state.
 
     Provides two filter values - 'complete' and 'incomplete'. A session
     that has no session_ended_at timestamp is considered incomplete. This
     field is set from the session_end signal receiver.
 
-    """
+    '''
 
     title = 'session state'
     parameter_name = 'session'
@@ -50,7 +50,7 @@ class SessionStateFilter(admin.SimpleListFilter):
 
 class ImpersonatorFilter(admin.SimpleListFilter):
 
-    """Custom admin filter based on the impersonator.
+    '''Custom admin filter based on the impersonator.
 
     Provides a set of users who have impersonated at some point. It is
     assumed that this is a small list of users - a subset of staff and
@@ -60,13 +60,13 @@ class ImpersonatorFilter(admin.SimpleListFilter):
     If the number of unique impersonators exceeds MAX_FILTER_SIZE, then
     the filter is removed (shows only 'All').
 
-    """
+    '''
 
     title = 'impersonator'
     parameter_name = 'impersonator'
 
     def lookups(self, request, model_admin):
-        """Return list of unique users who have been an impersonator."""
+        '''Return list of unique users who have been an impersonator.'''
         # the queryset containing the ImpersonationLog objects
         qs = model_admin.get_queryset(request).order_by('impersonator__first_name')
         # dedupe the impersonators
