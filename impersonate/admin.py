@@ -22,11 +22,12 @@ def friendly_name(user):
 
 class SessionStateFilter(admin.SimpleListFilter):
 
-    '''Custom admin filter based on the session state.
+    ''' Custom admin filter based on the session state.
 
-    Provides two filter values - 'complete' and 'incomplete'. A session
-    that has no session_ended_at timestamp is considered incomplete. This
-    field is set from the session_end signal receiver.
+        Provides two filter values - 'complete' and 'incomplete'.
+        A session that has no session_ended_at timestamp is
+        considered incomplete. This field is set from the
+        session_end signal receiver.
 
     '''
 
@@ -50,15 +51,16 @@ class SessionStateFilter(admin.SimpleListFilter):
 
 class ImpersonatorFilter(admin.SimpleListFilter):
 
-    '''Custom admin filter based on the impersonator.
+    ''' Custom admin filter based on the impersonator.
 
-    Provides a set of users who have impersonated at some point. It is
-    assumed that this is a small list of users - a subset of staff and
-    superusers. There is no corresponding filter for users who have been
-    impersonated, as this could be a very large set of users.
+        Provides a set of users who have impersonated at some point.
+        It is assumed that this is a small list of users - a subset
+        of staff and superusers. There is no corresponding filter
+        for users who have been impersonated, as this could be a
+        very large set of users.
     
-    If the number of unique impersonators exceeds MAX_FILTER_SIZE, then
-    the filter is removed (shows only 'All').
+        If the number of unique impersonators exceeds MAX_FILTER_SIZE,
+        then the filter is removed (shows only 'All').
 
     '''
 
