@@ -34,11 +34,7 @@ settings.configure(
 
 from django.test.utils import get_runner
 
-try:
-    django.setup()
-except AttributeError:
-    pass
-
+django.setup()
 TestRunner = get_runner(settings)
 test_runner = TestRunner()
 failures = test_runner.run_tests([APP_NAME])
