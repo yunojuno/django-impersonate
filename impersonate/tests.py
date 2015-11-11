@@ -19,37 +19,34 @@
         is_superuser = False
         is_staff = False
 '''
-from collections import namedtuple
 import datetime
+from collections import namedtuple
 
-from django.conf.urls import patterns, url, include
-from django.core.urlresolvers import reverse
-from django.http import HttpResponse
 from django.test import TestCase
-from django.test.client import Client, RequestFactory
-from django.test.utils import override_settings
+from django.http import HttpResponse
 from django.utils import six, timezone
+from django.core.urlresolvers import reverse
+from django.contrib.auth import get_user_model
+from django.test.utils import override_settings
+from django.conf.urls import patterns, url, include
+from django.test.client import Client, RequestFactory
 
-import mock
-
-from .signals import session_begin, session_end
-from .models import ImpersonationLog, on_session_begin, on_session_end
+from .models import ImpersonationLog
+from .signals import (
+    session_begin, session_end, on_session_begin, on_session_end,
+)
 
 try:
     # Python 3
+    from unittest import mock
     from urllib.parse import urlencode, urlsplit
 except ImportError:
+    import mock
     import factory
     from urllib import urlencode
     from urlparse import urlsplit
 
-try:
-    # Django 1.5 check
-    from django.contrib.auth import get_user_model
-except ImportError:
-    from django.contrib.auth.models import User
-else:
-    User = get_user_model()
+User = get_user_model()
 
 
 urlpatterns = patterns(
@@ -577,9 +574,8 @@ class TestImpersonation(TestCase):
 
 
 class TestImpersonationLog(TestCase):
-
-    ''' Tests for the ImpersonationLog model and signal receivers.'''
-
+    ''' Tests for the ImpersonationLog model and signal receivers.
+    '''
     def setUp(self):
         self.superuser = UserFactory.create(
             username='superuser',
@@ -638,4 +634,7 @@ class TestImpersonationLog(TestCase):
         self.assertEqual(log.impersonating, self.user)
         self.assertIsNotNone(log.session_started_at)
         self.assertTrue(log.session_ended_at > log.session_started_at)
-        self.assertEqual(log.duration, log.session_ended_at - log.session_started_at)  # noqa
+        self.assertEqual(
+            log.duration,
+            log.session_ended_at - log.session_started_at,
+        )
