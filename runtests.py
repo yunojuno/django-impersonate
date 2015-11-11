@@ -1,4 +1,6 @@
+# -*- coding: utf-8 -*-
 import sys
+
 import django
 from django.conf import settings
 
@@ -26,6 +28,8 @@ settings.configure(
         'django.contrib.admin',
         APP_NAME,
     ),
+    # turn off for testing, override in logging-specific tests
+    IMPERSONATE_DISABLE_LOGGING=True,
 )
 
 from django.test.utils import get_runner
