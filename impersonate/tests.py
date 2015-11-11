@@ -19,16 +19,21 @@
         is_superuser = False
         is_staff = False
 '''
-from django.utils import six
-from django.test import TestCase
-from django.utils import unittest
-from django.dispatch import receiver
-from django.http import HttpResponse
-from django.core.urlresolvers import reverse
-from django.test.utils import override_settings
-from django.test.client import Client, RequestFactory
+from collections import namedtuple
+import datetime
+
 from django.conf.urls import patterns, url, include
+from django.core.urlresolvers import reverse
+from django.http import HttpResponse
+from django.test import TestCase
+from django.test.client import Client, RequestFactory
+from django.test.utils import override_settings
+from django.utils import six, timezone
+
+import mock
+
 from .signals import session_begin, session_end
+from .models import ImpersonationLog, on_session_begin, on_session_end
 
 try:
     # Python 3
@@ -57,6 +62,12 @@ urlpatterns = patterns(
         name='another-test-view'),
     ('^', include('impersonate.urls')),
 )
+
+# simplistic mocking of request and session - used in ImpersonationLog tests
+MockRequest = namedtuple('MockRequest', 'user session')
+MockSession = namedtuple('MockSession', 'session_key')
+# fixed timestamp used to replace django.utils.timezone.now()
+MockNow = timezone.now()
 
 
 def test_view(request):
@@ -563,3 +574,68 @@ class TestImpersonation(TestCase):
         response = self.client.get(reverse('impersonate-list'))
         self.assertEqual(response.context['users'].count(), 4)
         self.client.logout()
+
+
+class TestImpersonationLog(TestCase):
+
+    ''' Tests for the ImpersonationLog model and signal receivers.'''
+
+    def setUp(self):
+        self.superuser = UserFactory.create(
+            username='superuser',
+            is_superuser=True,
+        )
+        self.user = UserFactory.create(username='regular')
+        self.session = MockSession('foo')
+        self.request = MockRequest(self.user, self.session)
+
+    @mock.patch('impersonate.models.DISABLE_SESSION_LOGGING', True)
+    def test_disable_logging(self):
+        self.assertFalse(ImpersonationLog.objects.exists())
+        on_session_begin(
+            sender=None,
+            impersonator=self.superuser,
+            impersonating=self.user,
+            request=self.request,
+        )
+        self.assertFalse(ImpersonationLog.objects.exists())
+
+    @mock.patch('impersonate.models.DISABLE_SESSION_LOGGING', False)
+    @mock.patch('impersonate.models.tz_now', lambda: MockNow)
+    def test_session_begin(self):
+        self.assertFalse(ImpersonationLog.objects.exists())
+        on_session_begin(
+            sender=None,
+            impersonator=self.superuser,
+            impersonating=self.user,
+            request=self.request,
+        )
+        # implicit assert that there is only one object
+        log = ImpersonationLog.objects.get()
+        self.assertEqual(log.impersonator, self.superuser)
+        self.assertEqual(log.impersonating, self.user)
+        self.assertIsNotNone(log.session_started_at)
+        self.assertIsNone(log.session_ended_at)
+        self.assertIsNone(log.duration)
+
+    @mock.patch('impersonate.models.DISABLE_SESSION_LOGGING', False)
+    def test_session_end(self):
+        self.assertFalse(ImpersonationLog.objects.exists())
+        on_session_begin(
+            sender=None,
+            impersonator=self.superuser,
+            impersonating=self.user,
+            request=self.request,
+        )
+        on_session_end(
+            sender=None,
+            impersonator=self.superuser,
+            impersonating=self.user,
+            request=self.request,
+        )
+        log = ImpersonationLog.objects.get()
+        self.assertEqual(log.impersonator, self.superuser)
+        self.assertEqual(log.impersonating, self.user)
+        self.assertIsNotNone(log.session_started_at)
+        self.assertTrue(log.session_ended_at > log.session_started_at)
+        self.assertEqual(log.duration, log.session_ended_at - log.session_started_at)  # noqa

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from .helpers import check_allow_for_user, check_allow_for_uri, User
 
 

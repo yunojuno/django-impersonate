@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from django.dispatch import Signal
 
 # signal sent when an impersonation session begins
