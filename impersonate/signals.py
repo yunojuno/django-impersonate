@@ -2,6 +2,7 @@
 import logging
 from django.conf import settings
 from django.dispatch import Signal, receiver
+from django.utils.timezone import now as tz_now
 from .models import ImpersonationLog
 
 logger = logging.getLogger(__name__)
@@ -17,14 +18,7 @@ session_end = Signal(
 )
 
 
-DISABLE_SESSION_LOGGING = getattr(
-    settings,
-    'IMPERSONATE_DISABLE_LOGGING',
-    False,
-)
-
-
-@receiver(session_begin)
+@receiver(session_begin, dispatch_uid='impersonate.signals.on_session_begin')
 def on_session_begin(sender, **kwargs):
     ''' Create a new ImpersonationLog object.
     '''
@@ -36,7 +30,8 @@ def on_session_begin(sender, **kwargs):
         impersonating,
     ))
 
-    if DISABLE_SESSION_LOGGING:
+    if getattr(settings, 'IMPERSONATE_DISABLE_LOGGING', False):
+        logger.info('ignore 1')
         return
 
     ImpersonationLog.objects.create(
@@ -48,7 +43,7 @@ def on_session_begin(sender, **kwargs):
 
 
 
-@receiver(session_end)
+@receiver(session_end, dispatch_uid='impersonate.signals.on_session_end')
 def on_session_end(sender, **kwargs):
     ''' Update ImpersonationLog with the end timestamp.
 
@@ -64,7 +59,7 @@ def on_session_end(sender, **kwargs):
         impersonating,
     ))
 
-    if DISABLE_SESSION_LOGGING:
+    if getattr(settings, 'IMPERSONATE_DISABLE_LOGGING', False):
         return
 
     try:
@@ -76,7 +71,6 @@ def on_session_end(sender, **kwargs):
                 session_ended_at__isnull=True,
         )
         log.session_ended_at = tz_now()
-        log.duration = log.session_ended_at - log.session_started_at
         log.save()
     except ImpersonationLog.DoesNotExist:
         logger.warning(

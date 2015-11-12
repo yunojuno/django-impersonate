@@ -31,17 +31,15 @@ from django.test.utils import override_settings
 from django.conf.urls import patterns, url, include
 from django.test.client import Client, RequestFactory
 
+from .helpers import duration_string
 from .models import ImpersonationLog
-from .signals import (
-    session_begin, session_end, on_session_begin, on_session_end,
-)
+from .signals import session_begin, session_end
+
 
 try:
     # Python 3
-    from unittest import mock
     from urllib.parse import urlencode, urlsplit
 except ImportError:
-    import mock
     import factory
     from urllib import urlencode
     from urlparse import urlsplit
@@ -59,12 +57,6 @@ urlpatterns = patterns(
         name='another-test-view'),
     ('^', include('impersonate.urls')),
 )
-
-# simplistic mocking of request and session - used in ImpersonationLog tests
-MockRequest = namedtuple('MockRequest', 'user session')
-MockSession = namedtuple('MockSession', 'session_key')
-# fixed timestamp used to replace django.utils.timezone.now()
-MockNow = timezone.now()
 
 
 def test_view(request):
@@ -572,69 +564,34 @@ class TestImpersonation(TestCase):
         self.assertEqual(response.context['users'].count(), 4)
         self.client.logout()
 
-
-class TestImpersonationLog(TestCase):
-    ''' Tests for the ImpersonationLog model and signal receivers.
-    '''
-    def setUp(self):
-        self.superuser = UserFactory.create(
-            username='superuser',
-            is_superuser=True,
-        )
-        self.user = UserFactory.create(username='regular')
-        self.session = MockSession('foo')
-        self.request = MockRequest(self.user, self.session)
-
-    @mock.patch('impersonate.models.DISABLE_SESSION_LOGGING', True)
-    def test_disable_logging(self):
+    def test_disable_impersonatelog_logging(self):
         self.assertFalse(ImpersonationLog.objects.exists())
-        on_session_begin(
-            sender=None,
-            impersonator=self.superuser,
-            impersonating=self.user,
-            request=self.request,
-        )
+        response = self._impersonate_helper('user1', 'foobar', 4)
         self.assertFalse(ImpersonationLog.objects.exists())
 
-    @mock.patch('impersonate.models.DISABLE_SESSION_LOGGING', False)
-    @mock.patch('impersonate.models.tz_now', lambda: MockNow)
-    def test_session_begin(self):
+    @override_settings(IMPERSONATE_DISABLE_LOGGING=False)
+    def test_signals_session_begin_impersonatelog(self):
         self.assertFalse(ImpersonationLog.objects.exists())
-        on_session_begin(
-            sender=None,
-            impersonator=self.superuser,
-            impersonating=self.user,
-            request=self.request,
-        )
-        # implicit assert that there is only one object
+        response = self._impersonate_helper('user1', 'foobar', 4)
         log = ImpersonationLog.objects.get()
-        self.assertEqual(log.impersonator, self.superuser)
-        self.assertEqual(log.impersonating, self.user)
+        self.assertEqual(log.impersonator.id, 1)
+        self.assertEqual(log.impersonating.id, 4)
         self.assertIsNotNone(log.session_started_at)
         self.assertIsNone(log.session_ended_at)
-        self.assertIsNone(log.duration)
 
-    @mock.patch('impersonate.models.DISABLE_SESSION_LOGGING', False)
-    def test_session_end(self):
+    @override_settings(IMPERSONATE_DISABLE_LOGGING=False)
+    def test_signals_session_end_impersonatelog(self):
         self.assertFalse(ImpersonationLog.objects.exists())
-        on_session_begin(
-            sender=None,
-            impersonator=self.superuser,
-            impersonating=self.user,
-            request=self.request,
-        )
-        on_session_end(
-            sender=None,
-            impersonator=self.superuser,
-            impersonating=self.user,
-            request=self.request,
-        )
+        response = self._impersonate_helper('user1', 'foobar', 4)
+        self.client.get(reverse('impersonate-stop'))
+
         log = ImpersonationLog.objects.get()
-        self.assertEqual(log.impersonator, self.superuser)
-        self.assertEqual(log.impersonating, self.user)
+        self.assertEqual(log.impersonator.id, 1)
+        self.assertEqual(log.impersonating.id, 4)
         self.assertIsNotNone(log.session_started_at)
+        self.assertIsNotNone(log.session_ended_at)
         self.assertTrue(log.session_ended_at > log.session_started_at)
         self.assertEqual(
             log.duration,
-            log.session_ended_at - log.session_started_at,
+            duration_string(log.session_ended_at - log.session_started_at),
         )

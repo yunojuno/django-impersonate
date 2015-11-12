@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-VERSION = (0, 9, 3, 'alpha', 0)
+VERSION = (1, 0, 0, 'alpha', 0)
 
 
 # taken from django-registration

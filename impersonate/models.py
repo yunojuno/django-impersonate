@@ -2,7 +2,6 @@
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.utils.timezone import now as tz_now
 
 
 class ImpersonationLog(models.Model):
@@ -38,10 +37,16 @@ class ImpersonationLog(models.Model):
         null=True,
         blank=True
     )
-    # denormalised duration - makes it easier to handle, and should
-    # only be written once on session_end.
-    duration = models.DurationField(
-        help_text='Time spent impersonating.',
-        null=True,
-        blank=True
-    )
+
+    @property
+    def duration(self):
+        return self._duration()
+
+    def _duration(self):
+        from .helpers import duration_string
+        if all((self.session_started_at, self.session_ended_at)):
+            return duration_string(
+                self.session_ended_at - self.session_started_at,
+            )
+        return u''
+    _duration.short_description = u'Duration'
