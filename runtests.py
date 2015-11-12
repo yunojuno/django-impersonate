@@ -12,7 +12,7 @@ settings.configure(
     DATABASES={
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-        }
+        },
     },
     USE_TZ=True,
     ROOT_URLCONF='{0}.tests'.format(APP_NAME),
