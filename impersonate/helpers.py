@@ -1,20 +1,13 @@
+# -*- coding: utf-8 -*-
 import re
+from importlib import import_module
+
 from django.conf import settings
 from django.utils.safestring import mark_safe
+from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator, EmptyPage
 
-try:
-    # Django 1.5 check
-    from django.contrib.auth import get_user_model
-except ImportError:
-    from django.contrib.auth.models import User
-else:
-    User = get_user_model()
-
-try:
-    from importlib import import_module  # Python 2.7
-except ImportError:
-    from django.utils.importlib import import_module
+User = get_user_model()
 
 
 def get_redir_path(request=None):
@@ -163,3 +156,29 @@ def check_allow_for_uri(uri):
             return False
 
     return True
+
+
+try:
+    from django.utils.duration import duration_string
+except ImportError:
+    # Django < 1.8
+    def duration_string(duration):
+        ''' Taken straight from Django 1.8 - django/utils/duration.py
+        '''
+        days = duration.days
+        seconds = duration.seconds
+        microseconds = duration.microseconds
+
+        minutes = seconds // 60
+        seconds = seconds % 60
+
+        hours = minutes // 60
+        minutes = minutes % 60
+
+        string = '{:02d}:{:02d}:{:02d}'.format(hours, minutes, seconds)
+        if days:
+            string = '{} '.format(days) + string
+        if microseconds:
+            string += '.{:06d}'.format(microseconds)
+
+        return string

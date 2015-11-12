@@ -19,16 +19,22 @@
         is_superuser = False
         is_staff = False
 '''
-from django.utils import six
+import datetime
+from collections import namedtuple
+
 from django.test import TestCase
-from django.utils import unittest
-from django.dispatch import receiver
 from django.http import HttpResponse
+from django.utils import six, timezone
 from django.core.urlresolvers import reverse
+from django.contrib.auth import get_user_model
 from django.test.utils import override_settings
-from django.test.client import Client, RequestFactory
 from django.conf.urls import patterns, url, include
+from django.test.client import Client, RequestFactory
+
+from .helpers import duration_string
+from .models import ImpersonationLog
 from .signals import session_begin, session_end
+
 
 try:
     # Python 3
@@ -38,13 +44,7 @@ except ImportError:
     from urllib import urlencode
     from urlparse import urlsplit
 
-try:
-    # Django 1.5 check
-    from django.contrib.auth import get_user_model
-except ImportError:
-    from django.contrib.auth.models import User
-else:
-    User = get_user_model()
+User = get_user_model()
 
 
 urlpatterns = patterns(
@@ -563,3 +563,35 @@ class TestImpersonation(TestCase):
         response = self.client.get(reverse('impersonate-list'))
         self.assertEqual(response.context['users'].count(), 4)
         self.client.logout()
+
+    def test_disable_impersonatelog_logging(self):
+        self.assertFalse(ImpersonationLog.objects.exists())
+        response = self._impersonate_helper('user1', 'foobar', 4)
+        self.assertFalse(ImpersonationLog.objects.exists())
+
+    @override_settings(IMPERSONATE_DISABLE_LOGGING=False)
+    def test_signals_session_begin_impersonatelog(self):
+        self.assertFalse(ImpersonationLog.objects.exists())
+        response = self._impersonate_helper('user1', 'foobar', 4)
+        log = ImpersonationLog.objects.get()
+        self.assertEqual(log.impersonator.id, 1)
+        self.assertEqual(log.impersonating.id, 4)
+        self.assertIsNotNone(log.session_started_at)
+        self.assertIsNone(log.session_ended_at)
+
+    @override_settings(IMPERSONATE_DISABLE_LOGGING=False)
+    def test_signals_session_end_impersonatelog(self):
+        self.assertFalse(ImpersonationLog.objects.exists())
+        response = self._impersonate_helper('user1', 'foobar', 4)
+        self.client.get(reverse('impersonate-stop'))
+
+        log = ImpersonationLog.objects.get()
+        self.assertEqual(log.impersonator.id, 1)
+        self.assertEqual(log.impersonating.id, 4)
+        self.assertIsNotNone(log.session_started_at)
+        self.assertIsNotNone(log.session_ended_at)
+        self.assertTrue(log.session_ended_at > log.session_started_at)
+        self.assertEqual(
+            log.duration,
+            duration_string(log.session_ended_at - log.session_started_at),
+        )
