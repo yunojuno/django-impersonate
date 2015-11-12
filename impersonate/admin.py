@@ -90,8 +90,8 @@ class ImpersonatorFilter(admin.SimpleListFilter):
 
 class ImpersonationLogAdmin(admin.ModelAdmin):
     list_display = (
-        'impersonator_',
-        'impersonating_',
+        '_impersonator',
+        '_impersonating',
         'session_key',
         'session_started_at',
         'duration'
@@ -109,10 +109,10 @@ class ImpersonationLogAdmin(admin.ModelAdmin):
         'session_started_at',
     )
 
-    def impersonator_(self, obj):
+    def _impersonator(self, obj):
         return friendly_name(obj.impersonator)
 
-    def impersonating_(self, obj):
+    def _impersonating(self, obj):
         return friendly_name(obj.impersonating)
 
 
