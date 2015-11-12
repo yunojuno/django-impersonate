@@ -102,7 +102,6 @@ class ImpersonationLogAdmin(admin.ModelAdmin):
         'session_key',
         'session_started_at',
         'session_ended_at',
-        'duration'
     )
     list_filter = (
         SessionStateFilter,
@@ -115,5 +114,6 @@ class ImpersonationLogAdmin(admin.ModelAdmin):
 
     def impersonating_(self, obj):
         return friendly_name(obj.impersonating)
+
 
 admin.site.register(ImpersonationLog, ImpersonationLogAdmin)

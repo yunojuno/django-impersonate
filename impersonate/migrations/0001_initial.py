@@ -19,7 +19,6 @@ class Migration(migrations.Migration):
                 ('session_key', models.CharField(help_text=b'The Django session request key.', max_length=b'40')),
                 ('session_started_at', models.DateTimeField(help_text=b'The time impersonation began.', null=True, blank=True)),
                 ('session_ended_at', models.DateTimeField(help_text=b'The time impersonation ended.', null=True, blank=True)),
-                ('duration', models.DurationField(help_text=b'Time spent impersonating.', null=True, blank=True)),
                 ('impersonating', models.ForeignKey(related_name='impersonated_by', to=settings.AUTH_USER_MODEL, help_text=b'The user being impersonated.')),
                 ('impersonator', models.ForeignKey(related_name='impersonations', to=settings.AUTH_USER_MODEL, help_text=b'The user doing the impersonating.')),
             ],
