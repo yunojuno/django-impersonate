@@ -31,7 +31,6 @@ def on_session_begin(sender, **kwargs):
     ))
 
     if getattr(settings, 'IMPERSONATE_DISABLE_LOGGING', False):
-        logger.info('ignore 1')
         return
 
     ImpersonationLog.objects.create(
