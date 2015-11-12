@@ -2,19 +2,21 @@
 django-impersonate
 ==================
 :Info: Simple application to allow superusers to "impersonate" other non-superuser accounts.
-:Version: 0.9.2
+:Version: 1.0
 :Author: Peter Sanchez (http://www.petersanchez.com)
 
 
 Dependencies
 ============
 
-* It was written for Python 2.6.5+ and Django 1.4+
-* Python 3.3+ is supported (Django 1.5+ required for Python 3.3+)
+* It was written for Python 2.7+ and Django 1.7+
+* Python 3.3+ is supported
 * It depends on your project using the django.contrib.session framework.
 
-**NOTE:** 
+**NOTE:**
 
+* **Version 1.0 adds new functionality by default.** Please see the IMPERSONATE_DISABLE_LOGGING setting section.
+* If you need to use this with Django older than 1.7, please use version django-impersonate == 0.9.2
 * **Version 0.9.2 partially reverts work completed in version 0.9.1.** This is because work done to address a request in `Issue #17 <https://bitbucket.org/petersanchez/django-impersonate/issues/17/remember-where-to-return-to-after>`_ broke default behavior for all previous versions. `Issue #24 <https://bitbucket.org/petersanchez/django-impersonate/issues/24/impersonate_redirect_url-no-longer-works>`_ was opened and the fix was released in 0.9.2 to address it. Please see the new IMPERSONATE_USE_HTTP_REFERER setting.
 * If you need to use this with Django older than 1.4, please use version django-impersonate == 0.5.3
 
@@ -172,11 +174,11 @@ present. Value should be a string containing the redirect path.
 
     IMPERSONATE_USE_HTTP_REFERER
 
-If this is set to True, then the app will attempt to be redirect you to 
-the URL you were at when the impersonation began once you have _stopped_ 
-the impersonation. For example, if you were at the url '/foo/bar/' when 
-you began impersonating a user, once you end the impersonation, you will 
-be redirected back to '/foo/bar/' instead of the value in 
+If this is set to True, then the app will attempt to be redirect you to
+the URL you were at when the impersonation began once you have _stopped_
+the impersonation. For example, if you were at the url '/foo/bar/' when
+you began impersonating a user, once you end the impersonation, you will
+be redirected back to '/foo/bar/' instead of the value in
 IMPERSONATE_REDIRECT_URL.
 
 Value should be a boolean (True/False), defaults to False
@@ -284,6 +286,22 @@ the USERNAME_FIELD attribute, it falls back to 'username' (< Django 1.5).
 A string that represents SQL lookup type for searching users by query on
 fields above. It is 'icontains' by default.
 
+    IMPERSONATE_DISABLE_LOGGING
+
+A bool that can be used to disable the logging of impersonation sessions. By
+default each impersonation ``session_begin`` signal will create a new
+``ImpersonationLog`` object, which is closed out (duration calculated) at
+the corresponding ``session_end`` signal.
+
+It is optional, and defaults to False (i.e. logging is enabled).
+
+    IMPERSONATE_MAX_FILTER_SIZE
+
+The max number of items acceptable in the admin list filters. If the number of
+items exceeds this, then the filter is removed (just shows all). This is used
+by the "Filter by impersonator" filter.
+
+It is optional, and defaults to 100.
 
 Testing
 =======
@@ -292,7 +310,7 @@ You need factory_boy installed for tests to run. To install, use:
 
     $ pip install factory_boy
 
-**Note:** This currently not required for Python 3.3. For more info on factory_boy, see: https://github.com/dnerdy/factory_boy
+**Note:** This currently not required for Python 3.3+. For more info on factory_boy, see: https://github.com/dnerdy/factory_boy
 
 From the repo checkout, ensure you have Django in your PYTHONPATH and  run:
 
@@ -313,20 +331,10 @@ And you should see::
 
     py3.4-django1.8: commands succeeded
     py3.4-django1.7: commands succeeded
-    py3.4-django1.6: commands succeeded
-    py3.4-django1.5: commands succeeded
     py3.3-django1.8: commands succeeded
     py3.3-django1.7: commands succeeded
-    py3.3-django1.6: commands succeeded
-    py3.3-django1.5: commands succeeded
     py2.7-django1.8: commands succeeded
     py2.7-django1.7: commands succeeded
-    py2.7-django1.6: commands succeeded
-    py2.7-django1.5: commands succeeded
-    py2.6-django1.5: commands succeeded
-    py2.6-django1.6: commands succeeded
-    py2.7-django1.4: commands succeeded
-    py2.6-django1.4: commands succeeded
     congratulations :)
 
 
