@@ -22,6 +22,7 @@
 import datetime
 from collections import namedtuple
 
+import django
 from django.test import TestCase
 from django.http import HttpResponse
 from django.utils import six, timezone
@@ -398,10 +399,18 @@ class TestImpersonation(TestCase):
                 self._redirect_check(response, '/test-redirect/')
                 response = self.client.get(reverse('impersonate-stop'))
                 use_url_path = url_path if use_refer else '/test-redirect/'
-                self.assertEqual(
-                    'http://testserver{0}'.format(use_url_path),
-                    response._headers['location'][1]
-                )
+
+                if not use_refer and django.get_version() >= '1.9':
+                    self.assertEqual(
+                        use_url_path,
+                        response._headers['location'][1]
+                    )
+                else:
+                    self.assertEqual(
+                        'http://testserver{0}'.format(use_url_path),
+                        response._headers['location'][1]
+                    )
+
                 self.assertEqual(self.client.session.get('_impersonate'), None)
                 self.client.logout()
 
