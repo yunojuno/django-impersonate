@@ -6,6 +6,7 @@ Changes
 - Update to use User PK instead of ID. (Pull Request #20)
 - Use proper URL tag for user search, listing templates. (Pull Requests #21, #22)
 - Add Impersonation Log support. (Issue #7, Pull Request #23)
+- Add support for Django 1.9 (Pull Request #24)
 
 0.9.2 (2015-08-24)
 
