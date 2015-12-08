@@ -12,3 +12,4 @@ syntax:regexp
 ^env$
 syntax: glob
 *.komodoproject
+.DS_Store
