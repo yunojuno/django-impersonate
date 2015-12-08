@@ -10,7 +10,7 @@ Dependencies
 ============
 
 * It was written for Python 2.7+ and Django 1.7+
-* Python 3.3+ is supported
+* Python 3.3+ is supported but Python 3.4+ is required for Django 1.9+
 * It depends on your project using the django.contrib.session framework.
 
 **NOTE:**
@@ -329,10 +329,14 @@ If you're bored and want to test all the supported environments, you'll need tox
 
 And you should see::
 
+    py3.5-django1.9: commands succeeded
+    py3.5-django1.8: commands succeeded
+    py3.4-django1.9: commands succeeded
     py3.4-django1.8: commands succeeded
     py3.4-django1.7: commands succeeded
     py3.3-django1.8: commands succeeded
     py3.3-django1.7: commands succeeded
+    py2.7-django1.9: commands succeeded
     py2.7-django1.8: commands succeeded
     py2.7-django1.7: commands succeeded
     congratulations :)
