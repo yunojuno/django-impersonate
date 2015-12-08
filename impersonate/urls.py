@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 
-from impersonate.views import impersonate, search_users, list_users, stop_impersonate
+from .views import stop_impersonate, list_users, search_users, impersonate
 
 
 urlpatterns = [
     url(r'^stop/$',
         stop_impersonate,
-        name='impersonate-stop',
-        prefix='impersonate.views'),
+        name='impersonate-stop'),
     url(r'^list/$',
         list_users,
         {'template': 'impersonate/list_users.html'},
@@ -18,9 +17,7 @@ urlpatterns = [
         search_users,
         {'template': 'impersonate/search_users.html'},
         name='impersonate-search',
-        prefix='impersonate.views'),
     url(r'^(?P<uid>.+)/$',
         impersonate,
-        name='impersonate-start',
-        prefix='impersonate.views'),
+        name='impersonate-start'),
 ]
