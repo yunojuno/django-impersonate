@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.db import models
 from django.conf import settings
-from django.contrib.auth.models import User
 
 
 class ImpersonationLog(models.Model):
@@ -14,12 +13,12 @@ class ImpersonationLog(models.Model):
 
     '''
     impersonator = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         help_text='The user doing the impersonating.',
         related_name='impersonations',
     )
     impersonating = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         related_name='impersonated_by',
         help_text='The user being impersonated.',
     )
