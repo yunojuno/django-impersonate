@@ -25,7 +25,7 @@ def on_session_begin(sender, **kwargs):
     impersonator = kwargs.get('impersonator')
     impersonating = kwargs.get('impersonating')
     session_key = kwargs.get('request').session.session_key
-    logger.info('{0} has started impersonating {1}.'.format(
+    logger.info(u'{0} has started impersonating {1}.'.format(
         impersonator,
         impersonating,
     ))
@@ -53,7 +53,7 @@ def on_session_end(sender, **kwargs):
     impersonator = kwargs.get('impersonator')
     impersonating = kwargs.get('impersonating')
     session_key = kwargs.get('request').session.session_key
-    logger.info('{0} has finished impersonating {1}.'.format(
+    logger.info(u'{0} has finished impersonating {1}.'.format(
         impersonator,
         impersonating,
     ))
@@ -73,8 +73,8 @@ def on_session_end(sender, **kwargs):
         log.save()
     except ImpersonationLog.DoesNotExist:
         logger.warning(
-            ('Unfinished ImpersonationLog could not be found for: '
-             '{0}, {1}, {2}').format(
+            (u'Unfinished ImpersonationLog could not be found for: '
+             u'{0}, {1}, {2}').format(
                  impersonator,
                  impersonating,
                  session_key,
@@ -82,8 +82,8 @@ def on_session_end(sender, **kwargs):
         )
     except ImpersonationLog.MultipleObjectsReturned:
         logger.warning(
-            ('Multiple unfinished ImpersonationLog matching: '
-             '{0}, {1}, {2}').format(
+            (u'Multiple unfinished ImpersonationLog matching: '
+             u'{0}, {1}, {2}').format(
                  impersonator,
                  impersonating,
                  session_key,
