@@ -22,7 +22,7 @@ session_end = Signal(
 
 def gen_unique_id():
     return hashlib.sha1(
-        '{0}:{1}'.format(get_random_string(), tz_now())
+        u'{0}:{1}'.format(get_random_string(), tz_now()).encode('utf-8')
     ).hexdigest()
 
 
