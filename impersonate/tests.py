@@ -583,8 +583,10 @@ class TestImpersonation(TestCase):
         self.assertFalse(ImpersonationLog.objects.exists())
         response = self._impersonate_helper('user1', 'foobar', 4)
         log = ImpersonationLog.objects.get()
+        session_key = self.client.session.get('_impersonate_session_id')
         self.assertEqual(log.impersonator.id, 1)
         self.assertEqual(log.impersonating.id, 4)
+        self.assertEqual(log.session_key, session_key)
         self.assertIsNotNone(log.session_started_at)
         self.assertIsNone(log.session_ended_at)
 
@@ -592,13 +594,17 @@ class TestImpersonation(TestCase):
     def test_signals_session_end_impersonatelog(self):
         self.assertFalse(ImpersonationLog.objects.exists())
         response = self._impersonate_helper('user1', 'foobar', 4)
+        session_key = self.client.session.get('_impersonate_session_id')
         self.client.get(reverse('impersonate-stop'))
+        none_session_key = self.client.session.get('_impersonate_session_id')
 
         log = ImpersonationLog.objects.get()
         self.assertEqual(log.impersonator.id, 1)
         self.assertEqual(log.impersonating.id, 4)
+        self.assertEqual(log.session_key, session_key)
         self.assertIsNotNone(log.session_started_at)
         self.assertIsNotNone(log.session_ended_at)
+        self.assertIsNone(none_session_key)
         self.assertTrue(log.session_ended_at > log.session_started_at)
         self.assertEqual(
             log.duration,
