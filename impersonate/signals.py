@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 import logging
+import hashlib
 from django.conf import settings
 from django.dispatch import Signal, receiver
 from django.utils.timezone import now as tz_now
+from django.utils.crypto import get_random_string
 from .models import ImpersonationLog
 
 logger = logging.getLogger(__name__)
@@ -18,13 +20,18 @@ session_end = Signal(
 )
 
 
+def gen_unique_id():
+    return hashlib.sha1(
+        u'{0}:{1}'.format(get_random_string(), tz_now()).encode('utf-8')
+    ).hexdigest()
+
+
 @receiver(session_begin, dispatch_uid='impersonate.signals.on_session_begin')
 def on_session_begin(sender, **kwargs):
     ''' Create a new ImpersonationLog object.
     '''
     impersonator = kwargs.get('impersonator')
     impersonating = kwargs.get('impersonating')
-    session_key = kwargs.get('request').session.session_key
     logger.info(u'{0} has started impersonating {1}.'.format(
         impersonator,
         impersonating,
@@ -33,12 +40,18 @@ def on_session_begin(sender, **kwargs):
     if getattr(settings, 'IMPERSONATE_DISABLE_LOGGING', False):
         return
 
+    request = kwargs.get('request')
+    session_key = gen_unique_id()
+
     ImpersonationLog.objects.create(
         impersonator=impersonator,
         impersonating=impersonating,
         session_key=session_key,
         session_started_at=tz_now()
     )
+
+    request.session['_impersonate_session_id'] = session_key
+    request.session.modified = True
 
 
 
@@ -52,7 +65,6 @@ def on_session_end(sender, **kwargs):
     '''
     impersonator = kwargs.get('impersonator')
     impersonating = kwargs.get('impersonating')
-    session_key = kwargs.get('request').session.session_key
     logger.info(u'{0} has finished impersonating {1}.'.format(
         impersonator,
         impersonating,
@@ -60,6 +72,9 @@ def on_session_end(sender, **kwargs):
 
     if getattr(settings, 'IMPERSONATE_DISABLE_LOGGING', False):
         return
+
+    request = kwargs.get('request')
+    session_key = request.session.get('_impersonate_session_id', None)
 
     try:
         # look for unfinished sessions that match impersonator / subject
@@ -89,3 +104,6 @@ def on_session_end(sender, **kwargs):
                  session_key,
              )
         )
+
+    del request.session['_impersonate_session_id']
+    request.session.modified = True
