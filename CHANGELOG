@@ -1,7 +1,11 @@
 Changes
 -------
 
-1.0 (DEV...)
+1.1 (Dev)
+
+- TODO Issue #19
+
+1.0 (2016-14-02)
 
 - Update to use User PK instead of ID. (Pull Request #20)
 - Use proper URL tag for user search, listing templates. (Pull Requests #21, #22)
