@@ -1,10 +1,12 @@
-==================
-django-impersonate
-==================
+.. |nlshield| image:: https://img.shields.io/badge/100%-Netlandish-blue.svg?style=square-flat
+              :target: http://www.netlandish.com
+
+==============================
+django-impersonate |nlshield|
+==============================
 :Info: Simple application to allow superusers to "impersonate" other non-superuser accounts.
 :Version: 1.0
 :Author: Peter Sanchez (http://www.petersanchez.com)
-
 
 Dependencies
 ============
