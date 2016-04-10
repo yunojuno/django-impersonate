@@ -16,25 +16,25 @@ class ImpersonationLog(models.Model):
     '''
     impersonator = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        help_text=u'The user doing the impersonating.',
+        help_text='The user doing the impersonating.',
         related_name='impersonations',
     )
     impersonating = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         related_name='impersonated_by',
-        help_text=u'The user being impersonated.',
+        help_text='The user being impersonated.',
     )
     session_key = models.CharField(
         max_length=40,
-        help_text=u'The Django session request key.',
+        help_text='The Django session request key.',
     )
     session_started_at = models.DateTimeField(
-        help_text=u'The time impersonation began.',
+        help_text='The time impersonation began.',
         null=True,
         blank=True
     )
     session_ended_at = models.DateTimeField(
-        help_text=u'The time impersonation ended.',
+        help_text='The time impersonation ended.',
         null=True,
         blank=True
     )
@@ -49,5 +49,5 @@ class ImpersonationLog(models.Model):
             return duration_string(
                 self.session_ended_at - self.session_started_at,
             )
-        return u''
-    _duration.short_description = u'Duration'
+        return ''
+    _duration.short_description = 'Duration'
