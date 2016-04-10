@@ -5,6 +5,9 @@ Changes
 
 - TODO Issue #19
 
+1.0.1 (2016-04-10)
+- Fix migration issues with custom User models. (Issue #31, Pull Request #26)
+
 1.0 (2016-02-14)
 
 - Update to use User PK instead of ID. (Pull Request #20)
