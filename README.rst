@@ -55,6 +55,7 @@ Use
         ... (all your other urls here) ...
     )
 
+**Note:** The ImpersonationMiddleware class should be placed AFTER the `django.contrib.auth` middleware classes
 
 Functionality
 =============
