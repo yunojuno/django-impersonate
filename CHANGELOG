@@ -4,6 +4,7 @@ Changes
 1.1 (Dev)
 
 - TODO Issue #19
+- Updated data sent to signal_end signal to be uniform with signal_begin and documentation. (Issue #34)
 - Updated middleware documentation. (Issue #33)
 
 1.0.1 (2016-04-10)
