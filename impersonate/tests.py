@@ -287,7 +287,6 @@ class TestImpersonation(TestCase):
         session_begin.disconnect(on_session_begin)
         session_end.disconnect(on_session_end)
 
-
     def test_successsful_impersonation_by_staff(self):
         response = self._impersonate_helper('user3', 'foobar', 4)
         self.assertEqual(self.client.session['_impersonate'], 4)
