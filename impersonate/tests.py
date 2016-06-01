@@ -247,7 +247,7 @@ class TestImpersonation(TestCase):
             self.assertIsNone(sender)
             self.assertIsNotNone(kwargs.pop('request', None))
             self.assertEqual(kwargs.pop('impersonator').username, 'user1')
-            impersonating = User.objects.get(pk=kwargs.pop('impersonating'))
+            impersonating = kwargs.pop('impersonating')
             self.assertEqual(impersonating.username, 'user4')
 
         self.assertFalse(self.session_begin_fired)
@@ -265,9 +265,28 @@ class TestImpersonation(TestCase):
         self.client.get(reverse('impersonate-stop'))
         self.assertEqual(self.client.session.get('_impersonate'), None)
         self.assertTrue(self.session_end_fired)
+
+        # Reset for edge case failure. Ref Issue #34
+        self.session_begin_fired = False
+        self.session_end_fired = False
+        self.assertFalse(self.session_begin_fired)
+        self.assertFalse(self.session_end_fired)
+
+        # Start impersonation
+        response = self._impersonate_helper('user1', 'foobar', 4)
+        self.assertTrue(self.session_begin_fired)
+        self.assertFalse(self.session_end_fired)
+
+        _session = self.client.session
+        _session['_impersonate'] = 1234  # Invalid User ID
+        _session.save()
+        self.client.get(reverse('impersonate-stop'))
+        self.assertFalse(self.session_end_fired)
+
         self.client.logout()
         session_begin.disconnect(on_session_begin)
         session_end.disconnect(on_session_end)
+
 
     def test_successsful_impersonation_by_staff(self):
         response = self._impersonate_helper('user3', 'foobar', 4)

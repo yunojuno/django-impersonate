@@ -16,30 +16,30 @@ settings.configure(
     },
     USE_TZ=True,
     ROOT_URLCONF='{0}.tests'.format(APP_NAME),
-    #LOGGING = {
-        #'version': 1,
-        #'disable_existing_loggers': False,
-        #'formatters': {
-            #'simple': {
-                #'format': '%(levelname)s %(message)s',
-            #},
-        #},
-        #'handlers': {
-            #'console': {
-                #'level':'DEBUG',
-                #'class':'logging.StreamHandler',
-                #'formatter': 'simple',
-                #'stream': sys.stdout,
-            #},
-        #},
-        #'loggers': {
-            #'impersonate': {
-                #'handlers': ['console'],
-                #'level': 'DEBUG',
-                #'propagate': True,
-            #},
-        #},
-    #},
+    # LOGGING = {
+        # 'version': 1,
+        # 'disable_existing_loggers': False,
+        # 'formatters': {
+            # 'simple': {
+                # 'format': '%(levelname)s %(message)s',
+            # },
+        # },
+        # 'handlers': {
+            # 'console': {
+                # 'level':'DEBUG',
+                # 'class':'logging.StreamHandler',
+                # 'formatter': 'simple',
+                # 'stream': sys.stdout,
+            # },
+        # },
+        # 'loggers': {
+            # 'impersonate': {
+                # 'handlers': ['console'],
+                # 'level': 'DEBUG',
+                # 'propagate': True,
+            # },
+        # },
+    # },
     MIDDLEWARE_CLASSES=(
         'django.contrib.sessions.middleware.SessionMiddleware',
         'django.contrib.auth.middleware.AuthenticationMiddleware',

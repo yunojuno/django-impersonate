@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import logging
 from django.db.models import Q
 from django.conf import settings
 from django.shortcuts import get_object_or_404, redirect, render
@@ -9,6 +10,8 @@ from .helpers import (
     get_redir_path, get_redir_arg, get_paginator, get_redir_field,
     check_allow_for_user, users_impersonable, User
 )
+
+logger = logging.getLogger(__name__)
 
 
 @allowed_user_required
@@ -48,8 +51,20 @@ def stop_impersonate(request):
         they were on.
     '''
     impersonating = request.session.pop('_impersonate', None)
+    if impersonating is not None:
+        try:
+            impersonating = User.objects.get(pk=impersonating)
+        except User.DoesNotExist:
+            # Should never be reached.
+            logger.info(
+                (u'NOTICE: User being impersonated (PK '
+                 u'{0}) no longer exists.').format(impersonating)
+            )
+            impersonating = None
+
     original_path = request.session.pop('_impersonate_prev_path', None)
     use_refer = getattr(settings, 'IMPERSONATE_USE_HTTP_REFERER', False)
+
     if impersonating is not None:
         request.session.modified = True
         session_end.send(
