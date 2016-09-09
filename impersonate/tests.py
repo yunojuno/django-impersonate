@@ -29,12 +29,16 @@ from django.utils import six, timezone
 from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
 from django.test.utils import override_settings
+from django.contrib.admin.sites import AdminSite
 from django.conf.urls import patterns, url, include
 from django.test.client import Client, RequestFactory
 
 from .helpers import duration_string
 from .models import ImpersonationLog
 from .signals import session_begin, session_end
+from .admin import (
+    SessionStateFilter, ImpersonatorFilter, ImpersonationLogAdmin,
+)
 
 
 try:
@@ -628,3 +632,101 @@ class TestImpersonation(TestCase):
             log.duration,
             duration_string(log.session_ended_at - log.session_started_at),
         )
+
+    @override_settings(IMPERSONATE_DISABLE_LOGGING=False)
+    def test_impersonatelog_admin_session_state_filter(self):
+        ''' Based on http://stackoverflow.com/questions/16751325/test-a-custom-filter-in-admin-py
+        '''
+        self.assertFalse(ImpersonationLog.objects.exists())
+        self._impersonate_helper('user1', 'foobar', 4)
+        self.client.get(reverse('impersonate-stop'))
+        self._impersonate_helper('user2', 'foobar', 4)
+
+        _filter = SessionStateFilter(
+            None,
+            {},
+            ImpersonationLog,
+            ImpersonationLogAdmin,
+        )
+        qs = _filter.queryset(None, ImpersonationLog.objects.all())
+        self.assertEqual(qs.count(), 2)
+
+        _filter = SessionStateFilter(
+            None,
+            {'session': 'complete'},
+            ImpersonationLog,
+            ImpersonationLogAdmin,
+        )
+        qs = _filter.queryset(None, ImpersonationLog.objects.all())
+        self.assertEqual(qs.count(), 1)
+
+        _filter = SessionStateFilter(
+            None,
+            {'session': 'incomplete'},
+            ImpersonationLog,
+            ImpersonationLogAdmin,
+        )
+        qs = _filter.queryset(None, ImpersonationLog.objects.all())
+        self.assertEqual(qs.count(), 1)
+
+    @override_settings(IMPERSONATE_DISABLE_LOGGING=False)
+    def test_impersonatelog_admin_impersonator_filter(self):
+        self.assertFalse(ImpersonationLog.objects.exists())
+        self._impersonate_helper('user1', 'foobar', 4)
+        self.client.get(reverse('impersonate-stop'))
+        self._impersonate_helper('user2', 'foobar', 4)
+        self.client.get(reverse('impersonate-stop'))
+        model_admin = ImpersonationLogAdmin(ImpersonationLog, AdminSite())
+
+        _filter = ImpersonatorFilter(
+            None,
+            {},
+            ImpersonationLog,
+            model_admin,
+        )
+        qs = _filter.queryset(None, ImpersonationLog.objects.all())
+        self.assertEqual(qs.count(), 2)
+
+        _filter = ImpersonatorFilter(
+            None,
+            {'impersonator': '1'},
+            ImpersonationLog,
+            model_admin,
+        )
+        qs = _filter.queryset(None, ImpersonationLog.objects.all())
+        self.assertEqual(qs.count(), 1)
+
+        _filter = ImpersonatorFilter(
+            None,
+            {'impersonator': '2'},
+            ImpersonationLog,
+            model_admin,
+        )
+        qs = _filter.queryset(None, ImpersonationLog.objects.all())
+        self.assertEqual(qs.count(), 1)
+
+        # Check that both user1 and user2 are in the lookup options
+        opts = [(_id, name) for _id, name in
+                    _filter.lookups(None, model_admin)]
+        self.assertTrue(1 in [x[0] for x in opts])
+        self.assertTrue(2 in [x[0] for x in opts])
+
+    @override_settings(IMPERSONATE_DISABLE_LOGGING=False,
+                       IMPERSONATE_MAX_FILTER_SIZE=1)
+    def test_impersonatelog_admin_impersonator_filter_max_filter_size(self):
+        self.assertFalse(ImpersonationLog.objects.exists())
+        self._impersonate_helper('user1', 'foobar', 4)
+        self.client.get(reverse('impersonate-stop'))
+        self._impersonate_helper('user2', 'foobar', 4)
+        self.client.get(reverse('impersonate-stop'))
+
+        model_admin = ImpersonationLogAdmin(ImpersonationLog, AdminSite())
+        _filter = ImpersonatorFilter(
+            None,
+            {},
+            ImpersonationLog,
+            model_admin,
+        )
+        opts = [(_id, name) for _id, name in
+                    _filter.lookups(None, model_admin)]
+        self.assertEqual(len(opts), 0)

@@ -3,19 +3,18 @@ import logging
 from django.conf import settings
 from django.contrib import admin
 
+from .helpers import User
 from .models import ImpersonationLog
 
 logger = logging.getLogger(__name__)
 
-MAX_FILTER_SIZE = getattr(settings, 'IMPERSONATE_MAX_FILTER_SIZE', 100)
-
 
 def friendly_name(user):
     '''Return proper name if exists, else username.'''
-    if user.get_full_name() != '':
-        return user.get_full_name()
-    else:
-        return user.username
+    name = None
+    if hasattr(user, 'get_full_name'):
+        name = user.get_full_name()
+    return name or user.username
 
 
 class SessionStateFilter(admin.SimpleListFilter):
@@ -31,8 +30,8 @@ class SessionStateFilter(admin.SimpleListFilter):
 
     def lookups(self, request, model_admin):
         return (
-            ('incomplete', "Incomplete"),
-            ('complete', "Complete"),
+            ('incomplete', 'Incomplete'),
+            ('complete', 'Complete'),
         )
 
     def queryset(self, request, queryset):
@@ -63,21 +62,34 @@ class ImpersonatorFilter(admin.SimpleListFilter):
         ''' Return list of unique users who have been an impersonator.
         '''
         # the queryset containing the ImpersonationLog objects
-        qs = model_admin.get_queryset(
-            request,
-        ).order_by('impersonator__first_name')
-        # dedupe the impersonators
-        impersonators = set([q.impersonator for q in qs])
-        if len(impersonators) > MAX_FILTER_SIZE:
+        MAX_FILTER_SIZE = getattr(settings, 'IMPERSONATE_MAX_FILTER_SIZE', 100)
+        try:
+            # Evaluate here to raise exception if needed
+            ids = list(
+                model_admin.get_queryset(
+                    request,
+                ).order_by().values_list(
+                    'impersonator_id',
+                    flat=True,
+                ).distinct('impersonator_id')
+            )
+        except NotImplementedError:
+            # Unit tests use sqlite db backend which doesn't support distinct.
+            qs = model_admin.get_queryset(request).only('impersonator_id')
+            ids = set([x.impersonator_id for x in qs])
+
+        if len(ids) > MAX_FILTER_SIZE:
             logger.debug(
                 ('Hiding admin list filter as number of impersonators [{0}] '
                  'exceeds MAX_FILTER_SIZE [{1}]').format(
-                     len(impersonators),
+                     len(ids),
                      MAX_FILTER_SIZE,
                  )
             )
             return
 
+        impersonators = \
+            User.objects.filter(id__in=ids).order_by(User.USERNAME_FIELD)
         for i in impersonators:
             yield (i.id, friendly_name(i))
 
