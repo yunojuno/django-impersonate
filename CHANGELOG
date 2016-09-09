@@ -4,6 +4,8 @@ Changes
 1.1 (Dev)
 
 - TODO Issue #19
+- Use USERNAME_FIELD for sorting in admin to avoid custom User model issues. (Issue #37)
+- Added test coverage and refactoring for admin filters.
 - Updated data sent to signal_end signal to be uniform with signal_begin and documentation. (Issue #34)
 - Updated middleware documentation. (Issue #33)
 
