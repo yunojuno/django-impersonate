@@ -37,7 +37,7 @@ Basic Manual Install::
 
 Alternative Install (Manually):
 
-Place impersonate directory in your Python path. Either in your Python installs site-packages directory or set your $PYTHONPATH environment variable to include a directory where the webutils directory lives.
+Place impersonate directory in your Python path. Either in your Python installs site-packages directory or set your $PYTHONPATH environment variable to include a directory where the impersonate directory lives.
 
 
 Use
