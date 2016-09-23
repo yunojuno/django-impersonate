@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 from .helpers import check_allow_for_user, check_allow_for_uri, User
 
+try:
+    from django.utils.deprecation import MiddlewareMixin
+except ImportError:
+    MiddlewareMixin = object  # fallback for Django < 1.10
 
-class ImpersonateMiddleware(object):
+
+class ImpersonateMiddleware(MiddlewareMixin):
     def process_request(self, request):
         request.user.is_impersonate = False
         request.impersonator = None
