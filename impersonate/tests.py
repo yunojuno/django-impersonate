@@ -53,6 +53,7 @@ except ImportError:
 User = get_user_model()
 django_version_loose = LooseVersion(django.get_version())
 
+
 def test_view(request):
     return HttpResponse('OK {0}'.format(request.user))
 
