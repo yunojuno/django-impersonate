@@ -21,16 +21,17 @@
 '''
 import datetime
 from collections import namedtuple
+from distutils.version import LooseVersion
 
 import django
 from django.test import TestCase
 from django.http import HttpResponse
 from django.utils import six, timezone
+from django.conf.urls import url, include
 from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
 from django.test.utils import override_settings
 from django.contrib.admin.sites import AdminSite
-from django.conf.urls import patterns, url, include
 from django.test.client import Client, RequestFactory
 
 from .helpers import duration_string
@@ -50,22 +51,21 @@ except ImportError:
     from urlparse import urlsplit
 
 User = get_user_model()
-
-
-urlpatterns = patterns(
-    '',
-    url(r'^test-view/$',
-        'impersonate.tests.test_view',
-        name='impersonate-test'),
-    url(r'^another-view/$',
-        'impersonate.tests.test_view',
-        name='another-test-view'),
-    ('^', include('impersonate.urls')),
-)
-
+django_version_loose = LooseVersion(django.get_version())
 
 def test_view(request):
     return HttpResponse('OK {0}'.format(request.user))
+
+
+urlpatterns = [
+    url(r'^test-view/$',
+        test_view,
+        name='impersonate-test'),
+    url(r'^another-view/$',
+        test_view,
+        name='another-test-view'),
+    url('^', include('impersonate.urls')),
+]
 
 
 def test_allow(request):
@@ -422,7 +422,7 @@ class TestImpersonation(TestCase):
                 response = self.client.get(reverse('impersonate-stop'))
                 use_url_path = url_path if use_refer else '/test-redirect/'
 
-                if not use_refer and django.get_version() >= '1.9':
+                if not use_refer and django_version_loose >= '1.9':
                     self.assertEqual(
                         use_url_path,
                         response._headers['location'][1]
