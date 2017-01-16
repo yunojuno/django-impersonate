@@ -1,9 +1,12 @@
 Changes
 -------
 
-1.1 (Dev)
+1.2 (Dev)
 
 - TODO Issue #19
+
+1.1 (2017-01-26)
+
 - Django 1.10 compatibility (get rid of deprecation warnings). (Issue #36)
 - Use USERNAME_FIELD for sorting in admin to avoid custom User model issues. (Issue #37)
 - Added test coverage and refactoring for admin filters.
