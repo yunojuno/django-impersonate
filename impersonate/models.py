@@ -16,11 +16,13 @@ class ImpersonationLog(models.Model):
     '''
     impersonator = models.ForeignKey(
         settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
         help_text='The user doing the impersonating.',
         related_name='impersonations',
     )
     impersonating = models.ForeignKey(
         settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
         related_name='impersonated_by',
         help_text='The user being impersonated.',
     )
