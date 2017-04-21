@@ -135,7 +135,7 @@ def search_users(request, template):
         search_q &= sub_q
 
     users = users_impersonable(request)
-    users = users.filter(search_q)
+    users = users.filter(search_q).distinct()
     paginator, page, page_number = get_paginator(request, users)
 
     return render(request, template, {
