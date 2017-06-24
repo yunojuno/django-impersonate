@@ -145,6 +145,7 @@ class TestMiddleware(TestCase):
         # Check request.user and request.user.real_user
         self.assertEqual(request.user, self.user)
         self.assertEqual(request.impersonator, self.superuser)
+        self.assertEqual(request.real_user, self.superuser)
         self.assertTrue(request.user.is_impersonate)
 
     def test_impersonated_request(self):
@@ -155,6 +156,18 @@ class TestMiddleware(TestCase):
             See Issue #15
         '''
         self._impersonated_request(use_id=False)
+
+    def test_not_impersonated_request(self, use_id=True):
+        """Check the real_user request attr is set correctly when **not** impersonating."""
+        request = self.factory.get('/')
+        request.user = self.user
+        request.session = {}
+        self.middleware.process_request(request)
+        # Check request.user and request.user.real_user
+        self.assertEqual(request.user, self.user)
+        self.assertIsNone(request.impersonator, None)
+        self.assertEqual(request.real_user, self.user)
+        self.assertFalse(request.user.is_impersonate)
 
 
 class TestImpersonation(TestCase):
