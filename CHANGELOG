@@ -5,6 +5,7 @@ Changes
 
 - TODO Issue #19
 - Make search results distinct. (Pull Request #31)
+- Add request.real_user for convenience. (Pull Request #32)
 
 1.1 (2017-01-26)
 
