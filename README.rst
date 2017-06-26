@@ -56,7 +56,7 @@ Use
         ... (all your other urls here) ...
     )
 
-**Note:** The ImpersonationMiddleware class should be placed AFTER the `django.contrib.auth` middleware classes
+**Note:** The ImpersonationMiddleware class should be placed AFTER the ``django.contrib.auth`` middleware classes
 
 Functionality
 =============
@@ -69,16 +69,21 @@ Replace <user-id> with the user id of the user you want to impersonate.
 
 While in impersonation "mode" the request.user object will have an
 "is_impersonate" attribute set to True. So if you wanted to check in your
-templates or view, you just do something like...
+templates or view, you just do something like...::
 
     {% if user.is_impersonate %} .... {% endif %}
 
-The original user is available as "request.impersonator".
+The original user is available as ``request.impersonator``::
 
     {{ request.user }} ({{ request.impersonator }})
 
+The real user is available as ``request.real_user`` - this is equivalent
+to calling ``getattr(request, 'impersonator', request.user)``::
+
+    assert request.real_user == getattr(request, 'impersonator', request.user)
+
 You can reference this URL with reverse() or the {% url %} template tag
-as 'impersonate-start'
+as 'impersonate-start'.
 
 
 **To remove the impersonation, hit the following path:**
@@ -88,7 +93,7 @@ as 'impersonate-start'
 You can reference this URL with reverse() or the {% url %} template tag
 as 'impersonate-stop'. When you call this URL, you will be redirected to
 the page that you used to start impersonating a user (eg, some search results
-or the user list.)
+or the user list).
 
 
 **To list all users you can go to:**
@@ -104,7 +109,7 @@ the following in the context:
 * page_number - Current page number, defaults to 1
 
 You can reference this URL with reverse() or the {% url %} template tag
-as 'impersonate-list'
+as 'impersonate-list'.
 
 
 **To search all users you can go to:**
@@ -127,7 +132,7 @@ fields searched are:
 User.username, User.first_name, User.last_name, User.email
 
 You can reference this URL with reverse() or the {% url %} template tag
-as 'impersonate-search'
+as 'impersonate-search'.
 
 
 **To allow some users to impersonate other users**
@@ -144,8 +149,8 @@ If you wish to hook into the impersonation session (for instance, in order to
 audit access), there are two signals that are fired by django-impersonate, at
 the beginning and end of a session:
 
-* session_begin - sent when calling the `impersonate` view
-* session_end - sent when calling the `stop_impersonate` view
+* session_begin - sent when calling the ``impersonate`` view
+* session_end - sent when calling the ``stop_impersonate`` view
 
 Both of these signals send the same arguments:
 
@@ -157,7 +162,7 @@ Both of these signals send the same arguments:
 The request object is included as it contains pertinent information that you may wish
 to audit - such as client IP address, user-agent string, etc.
 
-For an example of how to hook up the signals, see the relevant test - `test_successful_impersonation_signals`.
+For an example of how to hook up the signals, see the relevant test - ``test_successful_impersonation_signals``.
 
 NB The session_end signal will only be fired if the impersonator explicitly ends
 the session.
@@ -223,9 +228,9 @@ Value should be a boolean (True/False), and the default is False.
     IMPERSONATE_URI_EXCLUSIONS
 
 Set to a list/tuple of url patterns that, if matched, user
-impersonation is not completed. It defaults to:
+impersonation is not completed. It defaults to::
 
-(r'^admin/',)
+    (r'^admin/',)
 
 If you do not want to use even the default exclusions then set
 the setting to an emply list/tuple.
@@ -240,13 +245,13 @@ the users in this queryset can be impersonated.
 
 This function will not be called when the request has an unauthorised users,
 and will only be called when the user is allowed to impersonate (cf.
-IMPERSONATE_REQUIRE_SUPERUSER and IMPERSONATE_CUSTOM_ALLOW )
+IMPERSONATE_REQUIRE_SUPERUSER and IMPERSONATE_CUSTOM_ALLOW ).
 
 Regardless of what this function returns, a user cannot impersonate a
 superuser, even if there are superusers in the returned QuerySet.
 
 It is optional, and if it is not present, the user can impersonate any user
-(i.e. the default is User.objects.all())
+(i.e. the default is User.objects.all()).
 
 
     IMPERSONATE_CUSTOM_ALLOW
@@ -265,7 +270,7 @@ and IMPERSONATE_REQUIRE_SUPERUSER apply.
 
 A string that represents the name of a request (GET) parameter which contains
 the URL to redirect to after impersonating a user. This can be used to redirect
-to a custom page after impersonating a user. Example:
+to a custom page after impersonating a user. Example::
 
     # in settings.py
     IMPERSONATE_REDIRECT_FIELD_NAME = 'next'
@@ -275,7 +280,7 @@ to a custom page after impersonating a user. Example:
 
 To return always to the current page after impersonating a user, use request.path:
 
-    <a href="{% url 'impersonate-list' %}?next={{request.path}}">switch user</a>
+    ``<a href="{% url 'impersonate-list' %}?next={{request.path}}">switch user</a>``
 
 
     IMPERSONATE_SEARCH_FIELDS
@@ -310,19 +315,19 @@ It is optional, and defaults to 100.
 Testing
 =======
 
-You need factory_boy installed for tests to run. To install, use:
+You need factory_boy installed for tests to run. To install, use::
 
     $ pip install factory_boy
 
 **Note:** This currently not required for Python 3.3+. For more info on factory_boy, see: https://github.com/dnerdy/factory_boy
 
-From the repo checkout, ensure you have Django in your PYTHONPATH and  run:
+From the repo checkout, ensure you have Django in your PYTHONPATH and  run::
 
     $ python runtests.py
 
 To get test coverage, use::
 
-    $ coverate run --branch runtests.py
+    $ coverage run --branch runtests.py
     $ coverage html  <- Pretty HTML files for you
     $ coverage report -m  <- Ascii report
 
