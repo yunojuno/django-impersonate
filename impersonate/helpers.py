@@ -90,7 +90,7 @@ def users_impersonable(request):
         )
         return custom_queryset_func(request)
     else:
-        return User.objects.all()
+        return User.objects.all().order_by('username')
 
 
 def check_allow_for_user(request, end_user):
