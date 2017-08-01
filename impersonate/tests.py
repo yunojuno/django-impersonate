@@ -34,7 +34,7 @@ from django.test.utils import override_settings
 from django.contrib.admin.sites import AdminSite
 from django.test.client import Client, RequestFactory
 
-from .helpers import duration_string
+from .helpers import duration_string, users_impersonable
 from .models import ImpersonationLog
 from .signals import session_begin, session_end
 from .admin import (
@@ -580,9 +580,9 @@ class TestImpersonation(TestCase):
         # Add redirect value to query
         response = self.client.get(
             reverse('impersonate-list'),
-            {'next': u'/Ã¼ber/'},
+            {'next': u'/über/'},
         )
-        self.assertEqual(response.context['redirect'], u'?next=/Ã¼ber/')
+        self.assertEqual(response.context['redirect'], u'?next=/über/')
         self.client.logout()
 
     @override_settings(IMPERSONATE_CUSTOM_ALLOW='impersonate.tests.test_allow')
@@ -600,6 +600,10 @@ class TestImpersonation(TestCase):
                 IMPERSONATE_CUSTOM_ALLOW='impersonate.tests.test_allow2'):
             response = self.client.get(reverse('impersonate-test'))
             self.assertEqual(('user1' in str(response.content)), True) # !user4
+
+    def test_custom_user_queryset_ordered(self):
+        qs = users_impersonable(None)
+        self.assertEqual(qs.ordered, True)
 
     @override_settings(
         IMPERSONATE_CUSTOM_USER_QUERYSET='impersonate.tests.test_qs')
