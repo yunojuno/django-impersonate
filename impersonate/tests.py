@@ -580,9 +580,9 @@ class TestImpersonation(TestCase):
         # Add redirect value to query
         response = self.client.get(
             reverse('impersonate-list'),
-            {'next': u'/über/'},
+            {'next': u'/Ã¼ber/'},
         )
-        self.assertEqual(response.context['redirect'], u'?next=/über/')
+        self.assertEqual(response.context['redirect'], u'?next=/Ã¼ber/')
         self.client.logout()
 
     @override_settings(IMPERSONATE_CUSTOM_ALLOW='impersonate.tests.test_allow')
