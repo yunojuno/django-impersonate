@@ -5,7 +5,7 @@
 django-impersonate |nlshield|
 ==============================
 :Info: Simple application to allow superusers to "impersonate" other non-superuser accounts.
-:Version: 1.2
+:Version: 1.2.1
 :Author: Peter Sanchez (http://www.petersanchez.com)
 
 Dependencies
