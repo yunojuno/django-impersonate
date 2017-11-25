@@ -6,7 +6,7 @@ from django.utils.encoding import force_str
 from django.shortcuts import redirect, resolve_url
 from django.contrib.auth import REDIRECT_FIELD_NAME
 
-from .helpers import get_redir_path, check_allow_impersonate
+from .helpers import get_redir_path, check_allow_impersonate, is_authenticated
 
 
 def get_login_url():
@@ -15,7 +15,7 @@ def get_login_url():
 
 def allowed_user_required(view_func):
     def _checkuser(request, *args, **kwargs):
-        if not request.user.is_authenticated():
+        if not is_authenticated(request.user):
             return redirect(u'{0}?{1}={2}'.format(
                 get_login_url(),
                 REDIRECT_FIELD_NAME,

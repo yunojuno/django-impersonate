@@ -161,6 +161,21 @@ def check_allow_for_uri(uri):
     return True
 
 
+def is_authenticated(user):
+    ''' Helper to check if a user is authenticated or not.
+        Added because in Django 2.0, the method compatibility is
+        being removed.
+        https://docs.djangoproject.com/en/1.11/ref/contrib/auth/#django.contrib.auth.models.User.is_authenticated
+    '''
+    if not hasattr(user, 'is_authenticated'):
+        return False
+
+    if callable(user.is_authenticated):
+        return user.is_authenticated()
+    else:
+        return user.is_authenticated
+
+
 try:
     from django.utils.duration import duration_string
 except ImportError:
