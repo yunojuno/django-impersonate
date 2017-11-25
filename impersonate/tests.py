@@ -28,15 +28,14 @@ from django.test import TestCase
 from django.http import HttpResponse
 from django.utils import six, timezone
 from django.conf.urls import url, include
-from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
 from django.test.utils import override_settings
 from django.contrib.admin.sites import AdminSite
 from django.test.client import Client, RequestFactory
 
-from .helpers import duration_string, users_impersonable
 from .models import ImpersonationLog
 from .signals import session_begin, session_end
+from .helpers import duration_string, users_impersonable, is_authenticated
 from .admin import (
     SessionStateFilter, ImpersonatorFilter, ImpersonationLogAdmin,
 )
@@ -45,10 +44,12 @@ from .admin import (
 try:
     # Python 3
     from urllib.parse import urlencode, urlsplit
+    from django.urls import reverse
 except ImportError:
     import factory
     from urllib import urlencode
     from urlparse import urlsplit
+    from django.core.urlresolvers import reverse
 
 User = get_user_model()
 django_version_loose = LooseVersion(django.get_version())
@@ -73,7 +74,7 @@ def test_allow(request):
     ''' Used via the IMPERSONATE_CUSTOM_ALLOW setting.
         Simple check for the user to be auth'd and a staff member.
     '''
-    return request.user.is_authenticated() and request.user.is_staff
+    return is_authenticated(request.user) and request.user.is_staff
 
 
 def test_allow2(request):

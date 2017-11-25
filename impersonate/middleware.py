@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-from .helpers import check_allow_for_user, check_allow_for_uri, User
+from .helpers import (
+    User, check_allow_for_user, check_allow_for_uri, is_authenticated,
+)
 
 try:
     from django.utils.deprecation import MiddlewareMixin
@@ -12,7 +14,7 @@ class ImpersonateMiddleware(MiddlewareMixin):
         request.user.is_impersonate = False
         request.impersonator = None
 
-        if request.user.is_authenticated() and \
+        if is_authenticated(request.user) and \
            '_impersonate' in request.session:
             new_user_id = request.session['_impersonate']
             if isinstance(new_user_id, User):
