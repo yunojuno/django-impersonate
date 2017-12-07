@@ -73,7 +73,7 @@ settings.configure(
         'django.contrib.admin',
         APP_NAME,
     ),
-    IMPERSONATE_DISABLE_LOGGING=True,
+    IMPERSONATE={'DISABLE_LOGGING': True},
 )
 
 from django.test.utils import get_runner
