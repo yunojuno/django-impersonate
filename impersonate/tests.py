@@ -360,35 +360,37 @@ class TestImpersonation(TestCase):
         response = self.client.get(reverse('impersonate-list'))
         self._redirect_check(response, '/accounts/login/')
 
+    @override_settings(IMPERSONATE_REDIRECT_URL='/test-redirect/')
     def test_successful_impersonation_redirect_url(self):
-        with self.settings(IMPERSONATE_REDIRECT_URL='/test-redirect/'):
-            response = self._impersonate_helper('user1', 'foobar', 4)
-            self.assertEqual(self.client.session['_impersonate'], 4)
-            self._redirect_check(response, '/test-redirect/')
-            self.client.get(reverse('impersonate-stop'))
-            self.assertEqual(self.client.session.get('_impersonate'), None)
-            self.client.logout()
+        response = self._impersonate_helper('user1', 'foobar', 4)
+        self.assertEqual(self.client.session['_impersonate'], 4)
+        self._redirect_check(response, '/test-redirect/')
+        self.client.get(reverse('impersonate-stop'))
+        self.assertEqual(self.client.session.get('_impersonate'), None)
+        self.client.logout()
 
-        with self.settings(LOGIN_REDIRECT_URL='/test-redirect-2/'):
-            response = self._impersonate_helper('user1', 'foobar', 4)
-            self.assertEqual(self.client.session['_impersonate'], 4)
-            self._redirect_check(response, '/test-redirect-2/')
-            self.client.get(reverse('impersonate-stop'))
-            self.assertEqual(self.client.session.get('_impersonate'), None)
-            self.client.logout()
+    @override_settings(IMPERSONATE_REDIRECT_FIELD_NAME='next')
+    def test_successful_impersonation_redirect_field_name(self):
+        response = self._impersonate_helper(
+            'user1',
+            'foobar',
+            4,
+            {'next': '/test-next/'},
+        )
+        self.assertEqual(self.client.session['_impersonate'], 4)
+        self._redirect_check(response, '/test-next/')
+        self.client.get(reverse('impersonate-stop'))
+        self.assertEqual(self.client.session.get('_impersonate'), None)
+        self.client.logout()
 
-        with self.settings(IMPERSONATE_REDIRECT_FIELD_NAME='next'):
-            response = self._impersonate_helper(
-                'user1',
-                'foobar',
-                4,
-                {'next': '/test-next/'},
-            )
-            self.assertEqual(self.client.session['_impersonate'], 4)
-            self._redirect_check(response, '/test-next/')
-            self.client.get(reverse('impersonate-stop'))
-            self.assertEqual(self.client.session.get('_impersonate'), None)
-            self.client.logout()
+    @override_settings(LOGIN_REDIRECT_URL='/test-redirect-2/')
+    def test_successful_impersonation_login_redirect_url(self):
+        response = self._impersonate_helper('user1', 'foobar', 4)
+        self.assertEqual(self.client.session['_impersonate'], 4)
+        self._redirect_check(response, '/test-redirect-2/')
+        self.client.get(reverse('impersonate-stop'))
+        self.assertEqual(self.client.session.get('_impersonate'), None)
+        self.client.logout()
 
     @override_settings(IMPERSONATE_USE_HTTP_REFERER=True)
     def test_returned_to_original_path_after_impersonation(self):
