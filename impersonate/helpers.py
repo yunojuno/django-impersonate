@@ -2,36 +2,22 @@
 import re
 from importlib import import_module
 
-from django.conf import settings
 from django.utils.safestring import mark_safe
-from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator, EmptyPage
 
-User = get_user_model()
+from .settings import User, settings
 
 
 def get_redir_path(request=None):
     nextval = None
-    redirect_field_name = getattr(
-        settings,
-        'IMPERSONATE_REDIRECT_FIELD_NAME',
-        None,
-    )
+    redirect_field_name = settings.REDIRECT_FIELD_NAME
     if request and redirect_field_name:
         nextval = request.GET.get(redirect_field_name, None)
-    return nextval or getattr(
-        settings,
-        'IMPERSONATE_REDIRECT_URL',
-        getattr(settings, 'LOGIN_REDIRECT_URL', u'/'),
-    )
+    return nextval or settings.REDIRECT_URL
 
 
 def get_redir_arg(request):
-    redirect_field_name = getattr(
-        settings,
-        'IMPERSONATE_REDIRECT_FIELD_NAME',
-        None,
-    )
+    redirect_field_name = settings.REDIRECT_FIELD_NAME
     if redirect_field_name:
         nextval = request.GET.get(redirect_field_name, None)
         if nextval:
@@ -40,11 +26,7 @@ def get_redir_arg(request):
 
 
 def get_redir_field(request):
-    redirect_field_name = getattr(
-        settings,
-        'IMPERSONATE_REDIRECT_FIELD_NAME',
-        None,
-    )
+    redirect_field_name = settings.REDIRECT_FIELD_NAME
     if redirect_field_name:
         nextval = request.GET.get(redirect_field_name, None)
         if nextval:
@@ -65,7 +47,7 @@ def get_paginator(request, qs):
 
     paginator = Paginator(
         qs,
-        int(getattr(settings, 'IMPERSONATE_PAGINATE_COUNT', 20)),
+        int(settings.PAGINATE_COUNT),
     )
     try:
         page = paginator.page(page_number)
@@ -76,17 +58,17 @@ def get_paginator(request, qs):
 
 
 def check_allow_staff():
-    return (not getattr(settings, 'IMPERSONATE_REQUIRE_SUPERUSER', False))
+    return (not settings.REQUIRE_SUPERUSER)
 
 
 def users_impersonable(request):
     ''' Returns a QuerySet of users that this user can impersonate.
-        Uses the IMPERSONATE_CUSTOM_USER_QUERYSET if set, else, it
+        Uses the CUSTOM_USER_QUERYSET if set, else, it
         returns all users
     '''
-    if hasattr(settings, 'IMPERSONATE_CUSTOM_USER_QUERYSET'):
+    if settings.CUSTOM_USER_QUERYSET is not None:
         custom_queryset_func = import_func_from_string(
-            settings.IMPERSONATE_CUSTOM_USER_QUERYSET
+            settings.CUSTOM_USER_QUERYSET
         )
         return custom_queryset_func(request)
     else:
@@ -101,13 +83,9 @@ def check_allow_for_user(request, end_user):
     '''
     if check_allow_impersonate(request):
         # start user can impersonate
-        # Can impersonate superusers if IMPERSONATE_ALLOW_SUPERUSER is True
+        # Can impersonate superusers if ALLOW_SUPERUSER is True
         # Can impersonate anyone who is in your queryset of 'who i can impersonate'.
-        allow_superusers = getattr(
-            settings,
-            'IMPERSONATE_ALLOW_SUPERUSER',
-            False,
-        )
+        allow_superusers = settings.ALLOW_SUPERUSER
         upk = end_user.pk
         return (
             ((request.user.is_superuser and allow_superusers) or
@@ -130,12 +108,12 @@ def import_func_from_string(string_name):
 
 def check_allow_impersonate(request):
     ''' Returns True if this request is allowed to do any impersonation.
-        Uses the IMPERSONATE_CUSTOM_ALLOW function if required, else
-        looks at superuser/staff status and IMPERSONATE_REQUIRE_SUPERUSER
+        Uses the CUSTOM_ALLOW function if required, else
+        looks at superuser/staff status and REQUIRE_SUPERUSER
     '''
-    if hasattr(settings, 'IMPERSONATE_CUSTOM_ALLOW'):
+    if settings.CUSTOM_ALLOW is not None:
         custom_allow_func = \
-            import_func_from_string(settings.IMPERSONATE_CUSTOM_ALLOW)
+            import_func_from_string(settings.CUSTOM_ALLOW)
 
         return custom_allow_func(request)
     else:
@@ -150,7 +128,7 @@ def check_allow_impersonate(request):
 def check_allow_for_uri(uri):
     uri = uri.lstrip('/')
 
-    exclusions = getattr(settings, 'IMPERSONATE_URI_EXCLUSIONS', (r'^admin/',))
+    exclusions = settings.URI_EXCLUSIONS
     if not isinstance(exclusions, (list, tuple)):
         exclusions = (exclusions,)
 

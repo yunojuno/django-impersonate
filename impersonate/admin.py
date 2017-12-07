@@ -1,9 +1,9 @@
 #  -*- coding: utf-8 -*-
 import logging
-from django.conf import settings
 from django.contrib import admin
 
 from .helpers import User
+from .settings import settings
 from .models import ImpersonationLog
 
 logger = logging.getLogger(__name__)
@@ -62,7 +62,7 @@ class ImpersonatorFilter(admin.SimpleListFilter):
         ''' Return list of unique users who have been an impersonator.
         '''
         # the queryset containing the ImpersonationLog objects
-        MAX_FILTER_SIZE = getattr(settings, 'IMPERSONATE_MAX_FILTER_SIZE', 100)
+        MAX_FILTER_SIZE = settings.MAX_FILTER_SIZE
         try:
             # Evaluate here to raise exception if needed
             ids = list(
