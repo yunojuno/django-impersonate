@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 import logging
 from django.db.models import Q
-from django.conf import settings
 from django.shortcuts import get_object_or_404, redirect, render
 
+from .settings import User, settings
 from .decorators import allowed_user_required
 from .signals import session_begin, session_end
 from .helpers import (
     get_redir_path, get_redir_arg, get_paginator, get_redir_field,
-    check_allow_for_user, users_impersonable, User
+    check_allow_for_user, users_impersonable
 )
 
 logger = logging.getLogger(__name__)
@@ -63,7 +63,7 @@ def stop_impersonate(request):
             impersonating = None
 
     original_path = request.session.pop('_impersonate_prev_path', None)
-    use_refer = getattr(settings, 'IMPERSONATE_USE_HTTP_REFERER', False)
+    use_refer = settings.USE_HTTP_REFERER
 
     if impersonating is not None:
         request.session.modified = True
@@ -118,13 +118,9 @@ def search_users(request, template):
     '''
     query = request.GET.get('q', u'')
 
-    # get username field
-    username_field = getattr(User, 'USERNAME_FIELD', 'username')
-
     # define search fields and lookup type
-    search_fields = set(getattr(settings, 'IMPERSONATE_SEARCH_FIELDS',
-                         [username_field, 'first_name', 'last_name', 'email']))
-    lookup_type = getattr(settings, 'IMPERSONATE_LOOKUP_TYPE', 'icontains')
+    search_fields = set(settings.SEARCH_FIELDS)
+    lookup_type = settings.LOOKUP_TYPE
 
     # prepare kwargs
     search_q = Q()

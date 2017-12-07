@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 import logging
 import hashlib
-from django.conf import settings
 from django.dispatch import Signal, receiver
 from django.utils.timezone import now as tz_now
 from django.utils.crypto import get_random_string
+
+from .settings import settings
 from .models import ImpersonationLog
 
 logger = logging.getLogger(__name__)
@@ -37,7 +38,7 @@ def on_session_begin(sender, **kwargs):
         impersonating,
     ))
 
-    if getattr(settings, 'IMPERSONATE_DISABLE_LOGGING', False):
+    if settings.DISABLE_LOGGING:
         return
 
     request = kwargs.get('request')
@@ -70,7 +71,7 @@ def on_session_end(sender, **kwargs):
         impersonating,
     ))
 
-    if getattr(settings, 'IMPERSONATE_DISABLE_LOGGING', False):
+    if settings.DISABLE_LOGGING:
         return
 
     request = kwargs.get('request')
