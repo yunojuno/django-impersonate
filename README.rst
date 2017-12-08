@@ -5,22 +5,29 @@
 django-impersonate |nlshield|
 ==============================
 :Info: Simple application to allow superusers to "impersonate" other non-superuser accounts.
-:Version: 1.2.1
+:Version: 1.3.0
 :Author: Peter Sanchez (http://www.petersanchez.com)
+
+Python / Django Support
+=======================
+
+* Python 2.7+ for Django versions 1.8 - 1.11
+* Python 3.4+ for Django versions 1.9 - 2.0
+* Python 3.3 for Django version 1.8
+
+**Note:** In release 1.4 we plan to only support Python 3.4+ and Django 2.0+ moving forward. Bug fixes will be ported to older versions but new feature development will be focusing on modern releases of Python and Django.
 
 Dependencies
 ============
 
-* It was written for Python 2.7+ and Django 1.8+
-* Python 3.3+ is supported but Python 3.4+ is required for Django 1.9+
-* It depends on your project using the django.contrib.session framework.
+* Depends on your project using the django.contrib.session framework.
 
 **NOTE:**
 
-* **Version 1.0 adds new functionality by default.** Please see the IMPERSONATE_DISABLE_LOGGING setting section.
+* **Version 1.0 adds new functionality by default.** Please see the DISABLE_LOGGING settings option.
 * If you need to use this with Django older than 1.8, please use version django-impersonate == 1.0.1
 * If you need to use this with Django older than 1.7, please use version django-impersonate == 0.9.2
-* **Version 0.9.2 partially reverts work completed in version 0.9.1.** This is because work done to address a request in `Issue #17 <https://bitbucket.org/petersanchez/django-impersonate/issues/17/remember-where-to-return-to-after>`_ broke default behavior for all previous versions. `Issue #24 <https://bitbucket.org/petersanchez/django-impersonate/issues/24/impersonate_redirect_url-no-longer-works>`_ was opened and the fix was released in 0.9.2 to address it. Please see the new IMPERSONATE_USE_HTTP_REFERER setting.
+* **Version 0.9.2 partially reverts work completed in version 0.9.1.** This is because work done to address a request in `Issue #17 <https://bitbucket.org/petersanchez/django-impersonate/issues/17/remember-where-to-return-to-after>`_ broke default behavior for all previous versions. `Issue #24 <https://bitbucket.org/petersanchez/django-impersonate/issues/24/impersonate_redirect_url-no-longer-works>`_ was opened and the fix was released in 0.9.2 to address it. Please see the new USE_HTTP_REFERER settings option.
 * If you need to use this with Django older than 1.4, please use version django-impersonate == 0.5.3
 
 
@@ -137,11 +144,11 @@ as 'impersonate-search'.
 
 **To allow some users to impersonate other users**
 
-You can optionally allow only some non-superuser and non-staff users to impersonate by adding a **IMPERSONATE_CUSTOM_ALLOW** setting. Create a function that takes a request object, and based on your rules, returns True if the user is allowed to impersonate or not.
+You can optionally allow only some non-superuser and non-staff users to impersonate by adding a **CUSTOM_ALLOW** setting option. Create a function that takes a request object, and based on your rules, returns True if the user is allowed to impersonate or not.
 
 **To limit what users a user can impersonate**
 
-By, optionally, setting the **IMPERSONATE_CUSTOM_USER_QUERYSET** you can control what users can be impersonated. It takes a request object of the user, and returns a QuerySet of users. This is used when searching for users to impersonate, when listing what users to impersonate, and when trying to start impersonation.
+By, optionally, setting the **CUSTOM_USER_QUERYSET** option you can control what users can be impersonated. It takes a request object of the user, and returns a QuerySet of users. This is used when searching for users to impersonate, when listing what users to impersonate, and when trying to start impersonation.
 
 **Signals**
 
@@ -170,10 +177,21 @@ the session.
 Settings
 ========
 
-The following settings are available for django-impersonate:
+The following settings are available for django-impersonate. All settings should be 
+set as variables in a dictionary assigned to the attribute named ``IMPERSONATE``.
 
+For example::
 
-    IMPERSONATE_REDIRECT_URL
+    IMPERSONATE = {
+        'REDIRECT_URL': '/some-path/',
+        'PAGINATE_COUNT': 10,
+    }
+
+**Note:** This is a new format. The old format is now deprecated and support for the old format will be removed in a future release.
+
+Here are the options available...
+
+    REDIRECT_URL
 
 This is the URL you want to be redirected to _after_ you have chosen to
 impersonate another user. If this is not present it will check for
@@ -181,25 +199,25 @@ the LOGIN_REDIRECT_URL setting and fall back to '/' if neither is
 present. Value should be a string containing the redirect path.
 
 
-    IMPERSONATE_USE_HTTP_REFERER
+    USE_HTTP_REFERER
 
 If this is set to True, then the app will attempt to be redirect you to
 the URL you were at when the impersonation began once you have _stopped_
 the impersonation. For example, if you were at the url '/foo/bar/' when
 you began impersonating a user, once you end the impersonation, you will
 be redirected back to '/foo/bar/' instead of the value in
-IMPERSONATE_REDIRECT_URL.
+REDIRECT_URL.
 
 Value should be a boolean (True/False), defaults to False
 
 
-    IMPERSONATE_PAGINATE_COUNT
+    PAGINATE_COUNT
 
 This is the number of users to paginate by when using the list or
 search views. This defaults to 20. Value should be an integer.
 
 
-    IMPERSONATE_REQUIRE_SUPERUSER
+    REQUIRE_SUPERUSER
 
 If this is set to True, then only users who have 'is_superuser' set
 to True will be allowed to impersonate other users. Default is False.
@@ -211,21 +229,21 @@ allowed to impersonate a 'is_superuser' user.
 
 Value should be a boolean (True/False)
 
-If the IMPERSONATE_CUSTOM_ALLOW is set, then that custom function is used, and
+If the CUSTOM_ALLOW is set, then that custom function is used, and
 this setting is ignored.
 
 
-    IMPERSONATE_ALLOW_SUPERUSER
+    ALLOW_SUPERUSER
 
 By default, superusers cannot be impersonated; this setting allows for that.
 
 **Note:** Even when this is true, only superusers can impersonate other superusers,
-regardless of the value of IMPERSONATE_REQUIRE_SUPERUSER.
+regardless of the value of REQUIRE_SUPERUSER.
 
 Value should be a boolean (True/False), and the default is False.
 
 
-    IMPERSONATE_URI_EXCLUSIONS
+    URI_EXCLUSIONS
 
 Set to a list/tuple of url patterns that, if matched, user
 impersonation is not completed. It defaults to::
@@ -236,7 +254,7 @@ If you do not want to use even the default exclusions then set
 the setting to an emply list/tuple.
 
 
-    IMPERSONATE_CUSTOM_USER_QUERYSET
+    CUSTOM_USER_QUERYSET
 
 A string that represents a function (e.g. 'module.submodule.mod.function_name')
 that allows more fine grained control over what users a user can impersonate.
@@ -245,7 +263,7 @@ the users in this queryset can be impersonated.
 
 This function will not be called when the request has an unauthorised users,
 and will only be called when the user is allowed to impersonate (cf.
-IMPERSONATE_REQUIRE_SUPERUSER and IMPERSONATE_CUSTOM_ALLOW ).
+REQUIRE_SUPERUSER and CUSTOM_ALLOW ).
 
 Regardless of what this function returns, a user cannot impersonate a
 superuser, even if there are superusers in the returned QuerySet.
@@ -254,26 +272,26 @@ It is optional, and if it is not present, the user can impersonate any user
 (i.e. the default is User.objects.all()).
 
 
-    IMPERSONATE_CUSTOM_ALLOW
+    CUSTOM_ALLOW
 
 A string that represents a function (e.g. 'module.submodule.mod.function_name')
 that allows more fine grained control over who can use the impersonation. It
 takes one argument, the request object, and should return True to allow
 impesonation. Regardless of this setting, the user must be logged in to
-impersonate. If this setting is used, IMPERSONATE_REQUIRE_SUPERUSER is ignored.
+impersonate. If this setting is used, REQUIRE_SUPERUSER is ignored.
 
 It is optional, and if it is not present, the previous rules about superuser
-and IMPERSONATE_REQUIRE_SUPERUSER apply.
+and REQUIRE_SUPERUSER apply.
 
 
-    IMPERSONATE_REDIRECT_FIELD_NAME
+    REDIRECT_FIELD_NAME
 
 A string that represents the name of a request (GET) parameter which contains
 the URL to redirect to after impersonating a user. This can be used to redirect
 to a custom page after impersonating a user. Example::
 
     # in settings.py
-    IMPERSONATE_REDIRECT_FIELD_NAME = 'next'
+    IMPERSONATE = {'REDIRECT_FIELD_NAME': 'next'}
 
     # in your view
     <a href="{% url 'impersonate-list' %}?next=/some/url/">switch user</a>
@@ -283,19 +301,19 @@ To return always to the current page after impersonating a user, use request.pat
     ``<a href="{% url 'impersonate-list' %}?next={{request.path}}">switch user</a>``
 
 
-    IMPERSONATE_SEARCH_FIELDS
+    SEARCH_FIELDS
 
 Array of user model fields used for building searching query. Default value is
 [User.USERNAME_FIELD, 'first_name', 'last_name', 'email']. If the User model doesn't have
 the USERNAME_FIELD attribute, it falls back to 'username' (< Django 1.5).
 
 
-    IMPERSONATE_LOOKUP_TYPE
+    LOOKUP_TYPE
 
 A string that represents SQL lookup type for searching users by query on
 fields above. It is 'icontains' by default.
 
-    IMPERSONATE_DISABLE_LOGGING
+    DISABLE_LOGGING
 
 A bool that can be used to disable the logging of impersonation sessions. By
 default each impersonation ``session_begin`` signal will create a new
@@ -304,13 +322,33 @@ the corresponding ``session_end`` signal.
 
 It is optional, and defaults to False (i.e. logging is enabled).
 
-    IMPERSONATE_MAX_FILTER_SIZE
+    MAX_FILTER_SIZE
 
 The max number of items acceptable in the admin list filters. If the number of
 items exceeds this, then the filter is removed (just shows all). This is used
 by the "Filter by impersonator" filter.
 
 It is optional, and defaults to 100.
+
+SETTINGS PRIOR TO VERSION 1.3
+=============================
+
+Prior to version 1.3, settings were not stored in a dictionary. They were each an individual setting. For the time being, you can still use individual settings for each option. If present, they will supersede any setting within the ``IMPERSONATE`` dictionary and will also issue a warning that the settings format has changed and you should convert your projects settings to use the new dictionary format.
+
+All dictionary options can be used as individual settings by simply prepending "IMPERSONATE_" to the name. For example, the following is the dictionary sample from above and it's old style settings equivalent.
+
+New format::
+
+    IMPERSONATE = {
+        'REDIRECT_URL': '/some-path/',
+        'PAGINATE_COUNT': 10,
+    }
+
+
+Deprecated (old) format::
+
+    IMPERSONATE_REDIRECT_URL = '/some-path'
+    IMPERSONATE_PAGE_COUNT = 10
 
 Testing
 =======
@@ -338,17 +376,23 @@ If you're bored and want to test all the supported environments, you'll need tox
 
 And you should see::
 
+    py3.6-django2.0: commands succeeded
+    py3.6-django1.11: commands succeeded
+    py3.5-django1.11: commands succeeded
     py3.5-django1.10: commands succeeded
     py3.5-django1.9: commands succeeded
     py3.5-django1.8: commands succeeded
+    py3.4-django1.11: commands succeeded
     py3.4-django1.10: commands succeeded
     py3.4-django1.9: commands succeeded
     py3.4-django1.8: commands succeeded
     py3.3-django1.8: commands succeeded
+    py2.7-django1.11: commands succeeded
     py2.7-django1.10: commands succeeded
     py2.7-django1.9: commands succeeded
     py2.7-django1.8: commands succeeded
     congratulations :)
+
 
 Copyright & Warranty
 ====================
