@@ -24,6 +24,7 @@ Dependencies
 
 **NOTE:**
 
+* **Version 1.3 adds a settings format change.** Please see the Settings section for details.
 * **Version 1.0 adds new functionality by default.** Please see the DISABLE_LOGGING settings option.
 * If you need to use this with Django older than 1.8, please use version django-impersonate == 1.0.1
 * If you need to use this with Django older than 1.7, please use version django-impersonate == 0.9.2
