@@ -90,7 +90,10 @@ to calling ``getattr(request, 'impersonator', request.user)``::
     assert request.real_user == getattr(request, 'impersonator', request.user)
 
 You can reference this URL with reverse() or the {% url %} template tag
-as 'impersonate-start'.
+as 'impersonate-start' and expects the argument of the user ID. Example::
+
+    reverse('impersonate-start', args=[user.id])
+    reverse('impersonate-start', uid=user.id)
 
 
 **To remove the impersonation, hit the following path:**
@@ -150,7 +153,8 @@ You can optionally allow only some non-superuser and non-staff users to imperson
 
 By, optionally, setting the **CUSTOM_USER_QUERYSET** option you can control what users can be impersonated. It takes a request object of the user, and returns a QuerySet of users. This is used when searching for users to impersonate, when listing what users to impersonate, and when trying to start impersonation.
 
-**Signals**
+Signals
+=======
 
 If you wish to hook into the impersonation session (for instance, in order to
 audit access), there are two signals that are fired by django-impersonate, at
@@ -335,7 +339,7 @@ SETTINGS PRIOR TO VERSION 1.3
 
 Prior to version 1.3, settings were not stored in a dictionary. They were each an individual setting. For the time being, you can still use individual settings for each option. If present, they will supersede any setting within the ``IMPERSONATE`` dictionary and will also issue a warning that the settings format has changed and you should convert your projects settings to use the new dictionary format.
 
-All dictionary options can be used as individual settings by simply prepending "IMPERSONATE_" to the name. For example, the following is the dictionary sample from above and it's old style settings equivalent.
+All dictionary options can be used as individual settings by simply prepending ``IMPERSONATE_`` to the name. For example, the following is the dictionary sample from above and it's old style settings equivalent.
 
 New format::
 
@@ -349,6 +353,29 @@ Deprecated (old) format::
 
     IMPERSONATE_REDIRECT_URL = '/some-path'
     IMPERSONATE_PAGE_COUNT = 10
+
+Admin
+=====
+
+As of version 1.3 django-impersonate now includes a helper admin mixin, located at ``imepersonate.admin.UserAdminImpersonateMixin``, to include in your User model's ModelAdmin. This provides a direct link to impersonate users from your user model's Django admin list view. Using it is very simple, however if you're using the default ``django.contrib.auth.models.User`` model you will need to unregister the old ModelAdmin before registering your own.
+
+The ``UserAdminImpersonateMixin`` has a attribute named ``open_new_window`` that **defaults to False**. If this is set to True a new window will be opened to start the new impersonation session when clicking the impersonate link directly in the admin.
+
+Here's an example::
+
+    # yourapp/admin.py
+    from django.contrib import admin
+    from django.contrib.auth.models import User
+    from django.contrib.auth.admin import UserAdmin
+    from impersonate.admin import UserAdminImpersonateMixin
+
+
+    class NewUserAdmin(UserAdminImpersonateMixin, UserAdmin):
+        open_new_window = True
+        pass
+
+    admin.site.unregister(User)
+    admin.site.register(User, NewUserAdmin)
 
 Testing
 =======
