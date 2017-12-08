@@ -1,4 +1,4 @@
-.. |nlshield| image:: https://img.shields.io/badge/100%-Netlandish-blue.svg?style=square-flat
+.. |nlshield| image:: https://img.shields.io/badge/100%25-Netlandish-blue.svg?style=square-flat
               :target: http://www.netlandish.com
 
 ==============================
@@ -193,7 +193,7 @@ Here are the options available...
 
     REDIRECT_URL
 
-This is the URL you want to be redirected to _after_ you have chosen to
+This is the URL you want to be redirected to *after* you have chosen to
 impersonate another user. If this is not present it will check for
 the LOGIN_REDIRECT_URL setting and fall back to '/' if neither is
 present. Value should be a string containing the redirect path.
@@ -202,7 +202,7 @@ present. Value should be a string containing the redirect path.
     USE_HTTP_REFERER
 
 If this is set to True, then the app will attempt to be redirect you to
-the URL you were at when the impersonation began once you have _stopped_
+the URL you were at when the impersonation began once you have *stopped*
 the impersonation. For example, if you were at the url '/foo/bar/' when
 you began impersonating a user, once you end the impersonation, you will
 be redirected back to '/foo/bar/' instead of the value in
@@ -357,7 +357,7 @@ You need factory_boy installed for tests to run. To install, use::
 
     $ pip install factory_boy
 
-**Note:** This currently not required for Python 3.3+. For more info on factory_boy, see: https://github.com/dnerdy/factory_boy
+**Note:** This is currently not required for Python 3.3+. For more info on factory_boy, see: https://github.com/dnerdy/factory_boy
 
 From the repo checkout, ensure you have Django in your PYTHONPATH and  run::
 
