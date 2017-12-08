@@ -1,10 +1,16 @@
 #  -*- coding: utf-8 -*-
 import logging
 from django.contrib import admin
+from django.utils.html import format_html
 
-from .helpers import User
 from .settings import settings
 from .models import ImpersonationLog
+from .helpers import User, check_allow_impersonate
+
+try:
+    from django.urls import reverse
+except ImportError:
+    from django.core.urlresolvers import reverse
 
 logger = logging.getLogger(__name__)
 
@@ -98,6 +104,31 @@ class ImpersonatorFilter(admin.SimpleListFilter):
             return queryset
         else:
             return queryset.filter(impersonator_id=self.value())
+
+
+class UserAdminImpersonateMixin(object):
+    ''' Mixin to easily add user impersonation support via the Django
+        admin change list page.
+    '''
+    open_new_window = False
+
+    def get_list_display(self, request):
+        if not check_allow_impersonate(request):
+            return self.list_display
+        list_display = list(self.list_display)
+        list_display.append('impersonate_user')
+        return list_display
+
+    def impersonate_user(self, obj):
+        target = ''
+        if self.open_new_window:
+            target = ' target="_blank"'
+        return format_html(
+            '<a href="{}"{}>Impersonate</a>',
+            reverse('impersonate-start', args=[obj.id]),
+            target,
+        )
+    impersonate_user.short_description = 'Impersonate User'
 
 
 class ImpersonationLogAdmin(admin.ModelAdmin):

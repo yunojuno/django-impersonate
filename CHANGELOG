@@ -4,6 +4,8 @@ Changes
 1.3 (dev)
 
 - Django 2.0 compatable (Issue #46)
+- Consolidate settings into a single IMPERSIONATE dictionary (Issue #20)
+- Add admin Mixin to offer quick shortcut to user impersonation via Django admin. (Issue #19)
 
 1.2.1 (2017-11-13)
 
