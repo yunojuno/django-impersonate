@@ -23,6 +23,11 @@ import datetime
 from collections import namedtuple
 from distutils.version import LooseVersion
 
+try:
+    from unittest.mock import patch, PropertyMock
+except ImportError:
+    from mock import patch, PropertyMock
+
 import django
 from django.test import TestCase
 from django.http import HttpResponse
@@ -702,6 +707,8 @@ class TestImpersonation(TestCase):
         self.client.get(reverse('impersonate-stop'))
         self._impersonate_helper('user2', 'foobar', 4)
         self.client.get(reverse('impersonate-stop'))
+        self._impersonate_helper('user3', 'foobar', 4)
+        self.client.get(reverse('impersonate-stop'))
         model_admin = ImpersonationLogAdmin(ImpersonationLog, AdminSite())
 
         _filter = ImpersonatorFilter(
@@ -711,7 +718,7 @@ class TestImpersonation(TestCase):
             model_admin,
         )
         qs = _filter.queryset(None, ImpersonationLog.objects.all())
-        self.assertEqual(qs.count(), 2)
+        self.assertEqual(qs.count(), 3)
 
         _filter = ImpersonatorFilter(
             None,
@@ -731,11 +738,30 @@ class TestImpersonation(TestCase):
         qs = _filter.queryset(None, ImpersonationLog.objects.all())
         self.assertEqual(qs.count(), 1)
 
-        # Check that both user1 and user2 are in the lookup options
-        opts = [(_id, name) for _id, name in
-                    _filter.lookups(None, model_admin)]
-        self.assertTrue(1 in [x[0] for x in opts])
-        self.assertTrue(2 in [x[0] for x in opts])
+        _filter = ImpersonatorFilter(
+            None,
+            {'impersonator': '3'},
+            ImpersonationLog,
+            model_admin,
+        )
+        qs = _filter.queryset(None, ImpersonationLog.objects.all())
+        self.assertEqual(qs.count(), 1)
+
+        with patch(
+            'django.contrib.auth.models.AbstractUser.USERNAME_FIELD',
+            new_callable=PropertyMock,
+            return_value='is_active',
+        ):
+            # Check that user1, user2, and user3 are in the lookup options
+            opts = [(_id, name) for _id, name in
+                        _filter.lookups(None, model_admin)]
+            self.assertTrue(1 in [x[0] for x in opts])
+            self.assertTrue(2 in [x[0] for x in opts])
+            self.assertTrue(3 in [x[0] for x in opts])
+
+            # Check that `USERNAME_FIELD` field is used
+            # (`username` should not be hard-coded)
+            self.assertTrue(True in [x[1] for x in opts])
 
     @override_settings(IMPERSONATE={'DISABLE_LOGGING': False,
                                     'MAX_FILTER_SIZE': 1})
