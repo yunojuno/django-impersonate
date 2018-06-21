@@ -20,7 +20,7 @@ def friendly_name(user):
     name = None
     if hasattr(user, 'get_full_name'):
         name = user.get_full_name()
-    return name or user.username
+    return name or getattr(user, getattr(User, 'USERNAME_FIELD', 'username'))
 
 
 class SessionStateFilter(admin.SimpleListFilter):
