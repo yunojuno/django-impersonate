@@ -22,11 +22,7 @@
 import datetime
 from collections import namedtuple
 from distutils.version import LooseVersion
-
-try:
-    from unittest.mock import patch, PropertyMock
-except ImportError:
-    from mock import patch, PropertyMock
+from unittest.mock import patch, PropertyMock
 
 import django
 from django.test import TestCase

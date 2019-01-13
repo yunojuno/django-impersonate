@@ -5,17 +5,15 @@
 django-impersonate |nlshield|
 ==============================
 :Info: Simple application to allow superusers to "impersonate" other non-superuser accounts.
-:Version: 1.3.0
+:Version: 1.4.0
 :Author: Peter Sanchez (http://www.petersanchez.com)
 
 Python / Django Support
 =======================
 
-* Python 2.7+ for Django versions 1.8 - 1.11
-* Python 3.4+ for Django versions 1.9 - 2.0
-* Python 3.3 for Django version 1.8
+* Python 3.6+ for Django versions 1.11 - 2.1
 
-**Note:** In release 1.4 we plan to only support Python 3.4+ and Django 2.0+ moving forward. Bug fixes will be ported to older versions but new feature development will be focusing on modern releases of Python and Django.
+**Note:** As of version 1.4 we are only officially supporting Python 3.6+ and Django 1.11+. However, older versions of Python and Django should continue to work. We just will not guarantee it.
 
 Dependencies
 ============
@@ -24,6 +22,7 @@ Dependencies
 
 **NOTE:**
 
+* **Version 1.4 is now officially supporting Python 3.6+ and Django 1.11+**
 * **Version 1.3 adds a settings format change.** Please see the Settings section for details.
 * **Version 1.0 adds new functionality by default.** Please see the DISABLE_LOGGING settings option.
 * If you need to use this with Django older than 1.8, please use version django-impersonate == 1.0.1
@@ -404,21 +403,12 @@ If you're bored and want to test all the supported environments, you'll need tox
 
 And you should see::
 
+    py3.7-django2.1: commands succeeded
+    py3.6-django2.1: commands succeeded
+    py3.7-django2.0: commands succeeded
     py3.6-django2.0: commands succeeded
+    py3.7-django1.11: commands succeeded
     py3.6-django1.11: commands succeeded
-    py3.5-django1.11: commands succeeded
-    py3.5-django1.10: commands succeeded
-    py3.5-django1.9: commands succeeded
-    py3.5-django1.8: commands succeeded
-    py3.4-django1.11: commands succeeded
-    py3.4-django1.10: commands succeeded
-    py3.4-django1.9: commands succeeded
-    py3.4-django1.8: commands succeeded
-    py3.3-django1.8: commands succeeded
-    py2.7-django1.11: commands succeeded
-    py2.7-django1.10: commands succeeded
-    py2.7-django1.9: commands succeeded
-    py2.7-django1.8: commands succeeded
     congratulations :)
 
 
