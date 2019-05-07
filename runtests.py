@@ -44,6 +44,7 @@ settings.configure(
     MIDDLEWARE=(
         'django.contrib.sessions.middleware.SessionMiddleware',
         'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'django.contrib.messages.middleware.MessageMiddleware',
         'impersonate.middleware.ImpersonateMiddleware',
     ),
     MIDDLEWARE_CLASSES=(
@@ -70,6 +71,7 @@ settings.configure(
         'django.contrib.auth',
         'django.contrib.contenttypes',
         'django.contrib.sessions',
+        'django.contrib.messages',
         'django.contrib.admin',
         APP_NAME,
     ),
