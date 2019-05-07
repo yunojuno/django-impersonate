@@ -5,13 +5,13 @@
 django-impersonate |nlshield|
 ==============================
 :Info: Simple application to allow superusers to "impersonate" other non-superuser accounts.
-:Version: 1.4.0
+:Version: 1.4.1
 :Author: Peter Sanchez (http://www.petersanchez.com)
 
 Python / Django Support
 =======================
 
-* Python 3.6+ for Django versions 1.11 - 2.1
+* Python 3.6+ for Django versions 1.11 - 2.2
 
 **Note:** As of version 1.4 we are only officially supporting Python 3.6+ and Django 1.11+. However, older versions of Python and Django should continue to work. We just will not guarantee it.
 
@@ -403,7 +403,9 @@ If you're bored and want to test all the supported environments, you'll need tox
 
 And you should see::
 
+    py3.7-django2.2: commands succeeded
     py3.7-django2.1: commands succeeded
+    py3.6-django2.2: commands succeeded
     py3.6-django2.1: commands succeeded
     py3.7-django2.0: commands succeeded
     py3.6-django2.0: commands succeeded
