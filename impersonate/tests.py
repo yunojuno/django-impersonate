@@ -20,6 +20,7 @@
         is_staff = False
 '''
 import datetime
+import sys
 from collections import namedtuple
 from distutils.version import LooseVersion
 from unittest.mock import patch, PropertyMock
@@ -27,7 +28,7 @@ from unittest.mock import patch, PropertyMock
 import django
 from django.test import TestCase
 from django.http import HttpResponse
-from django.utils import six, timezone
+from django.utils import timezone
 from django.conf.urls import url, include
 from django.contrib.auth import get_user_model
 from django.test.utils import override_settings
@@ -95,7 +96,8 @@ def test_qs(request):
     return User.objects.all()
 
 
-if six.PY3:
+PYTHON_VERSION = sys.version_info
+if PYTHON_VERSION[0] == 3:
     # Temporary until factory_boy gets Py3k support
     class UserFactory(object):
         @staticmethod
