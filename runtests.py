@@ -40,19 +40,13 @@ settings.configure(
             # },
         # },
     # },
-    # Both MIDDLEWARE and MIDDLEWARE_CLASSES for testing purposes.
     MIDDLEWARE=(
         'django.contrib.sessions.middleware.SessionMiddleware',
         'django.contrib.auth.middleware.AuthenticationMiddleware',
         'django.contrib.messages.middleware.MessageMiddleware',
         'impersonate.middleware.ImpersonateMiddleware',
     ),
-    MIDDLEWARE_CLASSES=(
-        'django.contrib.sessions.middleware.SessionMiddleware',
-        'django.contrib.auth.middleware.AuthenticationMiddleware',
-        'impersonate.middleware.ImpersonateMiddleware',
-    ),
-    TEMPLATES = [
+    TEMPLATES=[
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [],
