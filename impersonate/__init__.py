@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-VERSION = (1, 4, 1, 'final', 0)
+VERSION = (1, 5, 0, 'final', 0)
 
 
 # taken from django-registration
-
 def get_version():
     "Returns a PEP 386-compliant version number from VERSION."
     assert len(VERSION) == 5

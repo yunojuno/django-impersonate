@@ -5,15 +5,15 @@
 django-impersonate |nlshield|
 ==============================
 :Info: Simple application to allow superusers to "impersonate" other non-superuser accounts.
-:Version: 1.4.1
+:Version: 1.5
 :Author: Peter Sanchez (http://www.petersanchez.com)
 
 Python / Django Support
 =======================
 
-* Python 3.6+ for Django versions 1.11 - 2.2
+* Python 3.6+ for Django versions 1.11, 2.2 and 3.0
 
-**Note:** As of version 1.4 we are only officially supporting Python 3.6+ and Django 1.11+. However, older versions of Python and Django should continue to work. We just will not guarantee it.
+**Note:** As of version 1.4 we are only officially supporting Python 3.6+ and following the Django support schedule. Meaning we can only guarantee support for the Django versions actively supported by the Django project. However, older versions of Python and Django should continue to work. We just will not guarantee it.
 
 Dependencies
 ============
@@ -22,6 +22,7 @@ Dependencies
 
 **NOTE:**
 
+* **Version 1.5 is not only officially supporting Django's 1.11, 2.2, and 3.0**
 * **Version 1.4 is now officially supporting Python 3.6+ and Django 1.11+**
 * **Version 1.3 adds a settings format change.** Please see the Settings section for details.
 * **Version 1.0 adds new functionality by default.** Please see the DISABLE_LOGGING settings option.
@@ -380,12 +381,6 @@ Here's an example::
 Testing
 =======
 
-You need factory_boy installed for tests to run. To install, use::
-
-    $ pip install factory_boy
-
-**Note:** This is currently not required for Python 3.3+. For more info on factory_boy, see: https://github.com/dnerdy/factory_boy
-
 From the repo checkout, ensure you have Django in your PYTHONPATH and  run::
 
     $ python runtests.py
@@ -403,16 +398,16 @@ If you're bored and want to test all the supported environments, you'll need tox
 
 And you should see::
 
-    py3.7-django2.2: commands succeeded
-    py3.7-django2.1: commands succeeded
-    py3.6-django2.2: commands succeeded
-    py3.6-django2.1: commands succeeded
-    py3.7-django2.0: commands succeeded
-    py3.6-django2.0: commands succeeded
-    py3.7-django1.11: commands succeeded
-    py3.6-django1.11: commands succeeded
+    py36-django1.11: commands succeeded
+    py36-django2.2: commands succeeded
+    py36-django3.0: commands succeeded
+    py37-django1.11: commands succeeded
+    py37-django2.2: commands succeeded
+    py37-django3.0: commands succeeded
+    py38-django1.11: commands succeeded
+    py38-django2.2: commands succeeded
+    py38-django3.0: commands succeeded
     congratulations :)
-
 
 Copyright & Warranty
 ====================
