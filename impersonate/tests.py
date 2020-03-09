@@ -19,42 +19,30 @@
         is_superuser = False
         is_staff = False
 '''
-import datetime
 import sys
-from collections import namedtuple
 from distutils.version import LooseVersion
-from unittest.mock import patch, PropertyMock
+from unittest.mock import PropertyMock, patch
+from urllib.parse import urlencode, urlsplit
 
 import django
-from django.test import TestCase
-from django.http import HttpResponse
-from django.utils import timezone
-from django.conf.urls import url, include
-from django.contrib.auth import get_user_model
-from django.test.utils import override_settings
+from django.conf.urls import include, url
 from django.contrib.admin.sites import AdminSite
+from django.contrib.auth import get_user_model
+from django.http import HttpResponse
+from django.test import TestCase
 from django.test.client import Client, RequestFactory
+from django.test.utils import override_settings
 
+from .admin import (ImpersonationLogAdmin, ImpersonatorFilter,
+                    SessionStateFilter)
+from .helpers import duration_string, is_authenticated, users_impersonable
 from .models import ImpersonationLog
 from .signals import session_begin, session_end
-from .helpers import duration_string, users_impersonable, is_authenticated
-from .admin import (
-    SessionStateFilter, ImpersonatorFilter, ImpersonationLogAdmin,
-)
-
 
 try:
     from django.urls import reverse
 except ImportError:
     from django.core.urlresolvers import reverse
-
-try:
-    # Python 3
-    from urllib.parse import urlencode, urlsplit
-except ImportError:
-    import factory
-    from urllib import urlencode
-    from urlparse import urlsplit
 
 User = get_user_model()
 django_version_loose = LooseVersion(django.get_version())
@@ -65,12 +53,8 @@ def test_view(request):
 
 
 urlpatterns = [
-    url(r'^test-view/$',
-        test_view,
-        name='impersonate-test'),
-    url(r'^another-view/$',
-        test_view,
-        name='another-test-view'),
+    url(r'^test-view/$', test_view, name='impersonate-test'),
+    url(r'^another-view/$', test_view, name='another-test-view'),
     url('^', include('impersonate.urls')),
 ]
 
@@ -96,37 +80,18 @@ def test_qs(request):
     return User.objects.all()
 
 
-PYTHON_VERSION = sys.version_info
-if PYTHON_VERSION[0] == 3:
-    # Temporary until factory_boy gets Py3k support
-    class UserFactory(object):
-        @staticmethod
-        def create(**kwargs):
-            password = kwargs.pop('password', None)
-            kwargs['email'] = \
-                '{0}@test-email.com'.format(kwargs['username']).lower()
-            user = User.objects.create(**kwargs)
-            if password:
-                user.set_password(password)
-                user.save()
-            return user
-else:
-    class UserFactory(factory.Factory):
-        FACTORY_FOR = User
-
-        email = factory.LazyAttribute(
-            lambda a: '{0}@test-email.com'.format(a.username).lower()
-        )
-
-        @classmethod
-        def _prepare(cls, create, **kwargs):
-            password = kwargs.pop('password', None)
-            user = super(UserFactory, cls)._prepare(create, **kwargs)
-            if password:
-                user.set_password(password)
-                if create:
-                    user.save()
-            return user
+class UserFactory(object):
+    @staticmethod
+    def create(**kwargs):
+        password = kwargs.pop('password', None)
+        kwargs['email'] = '{0}@test-email.com'.format(
+            kwargs['username']
+        ).lower()
+        user = User.objects.create(**kwargs)
+        if password:
+            user.set_password(password)
+            user.save()
+        return user
 
 
 class TestMiddleware(TestCase):
@@ -134,8 +99,7 @@ class TestMiddleware(TestCase):
         from impersonate.middleware import ImpersonateMiddleware
 
         self.superuser = UserFactory.create(
-            username='superuser',
-            is_superuser=True,
+            username='superuser', is_superuser=True,
         )
         self.user = UserFactory.create(username='regular')
         self.factory = RequestFactory()
@@ -178,7 +142,6 @@ class TestMiddleware(TestCase):
 
 
 class TestImpersonation(TestCase):
-
     def setUp(self):
         self.client = Client()
         user_data = (
@@ -188,14 +151,16 @@ class TestImpersonation(TestCase):
             ('', '', False, False),
         )
         for cnt, data in enumerate(user_data):
-            UserFactory.create(**{
-                'username': 'user{0}'.format(cnt + 1),
-                'first_name': data[0],
-                'last_name': data[1],
-                'is_superuser': data[2],
-                'is_staff': data[3],
-                'password': 'foobar',
-            })
+            UserFactory.create(
+                **{
+                    'username': 'user{0}'.format(cnt + 1),
+                    'first_name': data[0],
+                    'last_name': data[1],
+                    'is_superuser': data[2],
+                    'is_staff': data[3],
+                    'password': 'foobar',
+                }
+            )
 
     def _impersonate_helper(
         self,
@@ -203,7 +168,7 @@ class TestImpersonation(TestCase):
         passwd,
         user_id_to_impersonate,
         qwargs={},
-        starting_url=None
+        starting_url=None,
     ):
         ''' Trigger impersonate mode for a particular user id, using
             the specified authenticated user.
@@ -358,7 +323,9 @@ class TestImpersonation(TestCase):
         # Don't allow impersonated users to use restricted URI's
         with self.settings(IMPERSONATE={'URI_EXCLUSIONS': r'^test-view/'}):
             response = self.client.get(reverse('impersonate-test'))
-            self.assertEqual(('user1' in str(response.content)), True) # !user4
+            self.assertEqual(
+                ('user1' in str(response.content)), True
+            )  # !user4
 
         self.client.logout()
 
@@ -378,10 +345,7 @@ class TestImpersonation(TestCase):
     @override_settings(IMPERSONATE={'REDIRECT_FIELD_NAME': 'next'})
     def test_successful_impersonation_redirect_field_name(self):
         response = self._impersonate_helper(
-            'user1',
-            'foobar',
-            4,
-            {'next': '/test-next/'},
+            'user1', 'foobar', 4, {'next': '/test-next/'},
         )
         self.assertEqual(self.client.session['_impersonate'], 4)
         self._redirect_check(response, '/test-next/')
@@ -410,7 +374,7 @@ class TestImpersonation(TestCase):
                 user='user1',
                 passwd='foobar',
                 user_id_to_impersonate=4,
-                starting_url=starting_url
+                starting_url=starting_url,
             )
             self.assertEqual(self.client.session['_impersonate'], 4)
             self._redirect_check(response, '/accounts/profile/')
@@ -420,7 +384,7 @@ class TestImpersonation(TestCase):
             # compare querystrings
             self.assertEqual(
                 'http://testserver{0}'.format(starting_url),
-                response._headers['location'][1]
+                response._headers['location'][1],
             )
             self.assertEqual(self.client.session.get('_impersonate'), None)
             self.client.logout()
@@ -430,15 +394,14 @@ class TestImpersonation(TestCase):
             (reverse('another-test-view'), True),
             (reverse('another-test-view'), False),
         ):
-            with self.settings(IMPERSONATE={
-                'REDIRECT_URL': '/test-redirect/',
-                'USE_HTTP_REFERER': use_refer,
-            }):
+            with self.settings(
+                IMPERSONATE={
+                    'REDIRECT_URL': '/test-redirect/',
+                    'USE_HTTP_REFERER': use_refer,
+                }
+            ):
                 response = self._impersonate_helper(
-                    'user1',
-                    'foobar',
-                    4,
-                    starting_url=url_path,
+                    'user1', 'foobar', 4, starting_url=url_path,
                 )
                 self.assertEqual(self.client.session['_impersonate'], 4)
                 self._redirect_check(response, '/test-redirect/')
@@ -447,13 +410,12 @@ class TestImpersonation(TestCase):
 
                 if not use_refer and django_version_loose >= '1.9':
                     self.assertEqual(
-                        use_url_path,
-                        response._headers['location'][1]
+                        use_url_path, response._headers['location'][1]
                     )
                 else:
                     self.assertEqual(
                         'http://testserver{0}'.format(use_url_path),
-                        response._headers['location'][1]
+                        response._headers['location'][1],
                     )
 
                 self.assertEqual(self.client.session.get('_impersonate'), None)
@@ -483,57 +445,50 @@ class TestImpersonation(TestCase):
     def test_user_search_and_pagination(self):
         self.client.login(username='user1', password='foobar')
         response = self.client.get(
-            reverse('impersonate-search'),
-            {'q': 'john'},
+            reverse('impersonate-search'), {'q': 'john'},
         )
         self.assertEqual(response.context['users'].count(), 2)
 
         response = self.client.get(
-            reverse('impersonate-search'),
-            {'q': 'doe'},
+            reverse('impersonate-search'), {'q': 'doe'},
         )
         self.assertEqual(response.context['users'].count(), 1)
 
         response = self.client.get(
-            reverse('impersonate-search'),
-            {'q': '   john   doe'},
+            reverse('impersonate-search'), {'q': '   john   doe'},
         )
         self.assertEqual(response.context['users'].count(), 1)
 
         response = self.client.get(
-            reverse('impersonate-search'),
-            {'q': 'noresultsfound'},
+            reverse('impersonate-search'), {'q': 'noresultsfound'},
         )
         self.assertEqual(response.context['users'].count(), 0)
 
         with self.settings(IMPERSONATE={'PAGINATE_COUNT': 2}):
             response = self.client.get(
-                reverse('impersonate-search'),
-                {'q': 'test-email'},
+                reverse('impersonate-search'), {'q': 'test-email'},
             )
             self.assertEqual(response.context['paginator'].num_pages, 2)
             self.assertEqual(response.context['users'].count(), 4)
         self.client.logout()
 
     @override_settings(
-        IMPERSONATE={'SEARCH_FIELDS': ['first_name', 'last_name']})
+        IMPERSONATE={'SEARCH_FIELDS': ['first_name', 'last_name']}
+    )
     def test_user_search_custom_fields(self):
         self.client.login(username='user1', password='foobar')
         response = self.client.get(
-            reverse('impersonate-search'),
-            {'q': 'john'},
+            reverse('impersonate-search'), {'q': 'john'},
         )
         self.assertEqual(response.context['users'].count(), 2)
 
         response = self.client.get(
-            reverse('impersonate-search'),
-            {'q': 'doe'},
+            reverse('impersonate-search'), {'q': 'doe'},
         )
         self.assertEqual(response.context['users'].count(), 1)
 
         response = self.client.get(
-            reverse('impersonate-search'),
-            {'q': 'user'},
+            reverse('impersonate-search'), {'q': 'user'},
         )
         self.assertEqual(response.context['users'].count(), 0)
         self.client.logout()
@@ -542,26 +497,22 @@ class TestImpersonation(TestCase):
     def test_user_search_custom_lookup(self):
         self.client.login(username='user1', password='foobar')
         response = self.client.get(
-            reverse('impersonate-search'),
-            {'q': 'John'},
+            reverse('impersonate-search'), {'q': 'John'},
         )
         self.assertEqual(response.context['users'].count(), 2)
 
         response = self.client.get(
-            reverse('impersonate-search'),
-            {'q': 'Doe'},
+            reverse('impersonate-search'), {'q': 'Doe'},
         )
         self.assertEqual(response.context['users'].count(), 1)
 
         response = self.client.get(
-            reverse('impersonate-search'),
-            {'q': 'john'},
+            reverse('impersonate-search'), {'q': 'john'},
         )
         self.assertEqual(response.context['users'].count(), 0)
 
         response = self.client.get(
-            reverse('impersonate-search'),
-            {'q': 'doe'},
+            reverse('impersonate-search'), {'q': 'doe'},
         )
         self.assertEqual(response.context['users'].count(), 0)
 
@@ -573,8 +524,7 @@ class TestImpersonation(TestCase):
 
         # Add redirect value to query
         response = self.client.get(
-            reverse('impersonate-list'),
-            {'next': '/test/'},
+            reverse('impersonate-list'), {'next': '/test/'},
         )
         self.assertEqual(response.context['redirect'], '?next=/test/')
         self.client.logout()
@@ -589,14 +539,14 @@ class TestImpersonation(TestCase):
 
         # Add redirect value to query
         response = self.client.get(
-            reverse('impersonate-list'),
-            {'next': u'/über/'},
+            reverse('impersonate-list'), {'next': u'/über/'},
         )
         self.assertEqual(response.context['redirect'], u'?next=/über/')
         self.client.logout()
 
     @override_settings(
-        IMPERSONATE={'CUSTOM_ALLOW': 'impersonate.tests.test_allow'})
+        IMPERSONATE={'CUSTOM_ALLOW': 'impersonate.tests.test_allow'}
+    )
     def test_custom_user_allow_function(self):
         self.client.login(username='user1', password='foobar')
         response = self.client.get(reverse('impersonate-list'))
@@ -608,16 +558,20 @@ class TestImpersonation(TestCase):
         '''
         response = self._impersonate_helper('user1', 'foobar', 4)
         with self.settings(
-                IMPERSONATE={'CUSTOM_ALLOW': 'impersonate.tests.test_allow2'}):
+            IMPERSONATE={'CUSTOM_ALLOW': 'impersonate.tests.test_allow2'}
+        ):
             response = self.client.get(reverse('impersonate-test'))
-            self.assertEqual(('user1' in str(response.content)), True) # !user4
+            self.assertEqual(
+                ('user1' in str(response.content)), True
+            )  # !user4
 
     def test_custom_user_queryset_ordered(self):
         qs = users_impersonable(None)
         self.assertEqual(qs.ordered, True)
 
     @override_settings(
-        IMPERSONATE={'CUSTOM_USER_QUERYSET': 'impersonate.tests.test_qs'})
+        IMPERSONATE={'CUSTOM_USER_QUERYSET': 'impersonate.tests.test_qs'}
+    )
     def test_custom_user_queryset_function(self):
         self.client.login(username='user1', password='foobar')
         response = self.client.get(reverse('impersonate-list'))
@@ -672,10 +626,7 @@ class TestImpersonation(TestCase):
         self._impersonate_helper('user2', 'foobar', 4)
 
         _filter = SessionStateFilter(
-            None,
-            {},
-            ImpersonationLog,
-            ImpersonationLogAdmin,
+            None, {}, ImpersonationLog, ImpersonationLogAdmin,
         )
         qs = _filter.queryset(None, ImpersonationLog.objects.all())
         self.assertEqual(qs.count(), 2)
@@ -709,38 +660,24 @@ class TestImpersonation(TestCase):
         self.client.get(reverse('impersonate-stop'))
         model_admin = ImpersonationLogAdmin(ImpersonationLog, AdminSite())
 
-        _filter = ImpersonatorFilter(
-            None,
-            {},
-            ImpersonationLog,
-            model_admin,
-        )
+        _filter = ImpersonatorFilter(None, {}, ImpersonationLog, model_admin,)
         qs = _filter.queryset(None, ImpersonationLog.objects.all())
         self.assertEqual(qs.count(), 3)
 
         _filter = ImpersonatorFilter(
-            None,
-            {'impersonator': '1'},
-            ImpersonationLog,
-            model_admin,
+            None, {'impersonator': '1'}, ImpersonationLog, model_admin,
         )
         qs = _filter.queryset(None, ImpersonationLog.objects.all())
         self.assertEqual(qs.count(), 1)
 
         _filter = ImpersonatorFilter(
-            None,
-            {'impersonator': '2'},
-            ImpersonationLog,
-            model_admin,
+            None, {'impersonator': '2'}, ImpersonationLog, model_admin,
         )
         qs = _filter.queryset(None, ImpersonationLog.objects.all())
         self.assertEqual(qs.count(), 1)
 
         _filter = ImpersonatorFilter(
-            None,
-            {'impersonator': '3'},
-            ImpersonationLog,
-            model_admin,
+            None, {'impersonator': '3'}, ImpersonationLog, model_admin,
         )
         qs = _filter.queryset(None, ImpersonationLog.objects.all())
         self.assertEqual(qs.count(), 1)
@@ -751,8 +688,9 @@ class TestImpersonation(TestCase):
             return_value='is_active',
         ):
             # Check that user1, user2, and user3 are in the lookup options
-            opts = [(_id, name) for _id, name in
-                        _filter.lookups(None, model_admin)]
+            opts = [
+                (_id, name) for _id, name in _filter.lookups(None, model_admin)
+            ]
             self.assertTrue(1 in [x[0] for x in opts])
             self.assertTrue(2 in [x[0] for x in opts])
             self.assertTrue(3 in [x[0] for x in opts])
@@ -761,8 +699,9 @@ class TestImpersonation(TestCase):
             # (`username` should not be hard-coded)
             self.assertTrue(True in [x[1] for x in opts])
 
-    @override_settings(IMPERSONATE={'DISABLE_LOGGING': False,
-                                    'MAX_FILTER_SIZE': 1})
+    @override_settings(
+        IMPERSONATE={'DISABLE_LOGGING': False, 'MAX_FILTER_SIZE': 1}
+    )
     def test_impersonatelog_admin_impersonator_filter_max_filter_size(self):
         self.assertFalse(ImpersonationLog.objects.exists())
         self._impersonate_helper('user1', 'foobar', 4)
@@ -771,12 +710,8 @@ class TestImpersonation(TestCase):
         self.client.get(reverse('impersonate-stop'))
 
         model_admin = ImpersonationLogAdmin(ImpersonationLog, AdminSite())
-        _filter = ImpersonatorFilter(
-            None,
-            {},
-            ImpersonationLog,
-            model_admin,
-        )
-        opts = [(_id, name) for _id, name in
-                    _filter.lookups(None, model_admin)]
+        _filter = ImpersonatorFilter(None, {}, ImpersonationLog, model_admin,)
+        opts = [
+            (_id, name) for _id, name in _filter.lookups(None, model_admin)
+        ]
         self.assertEqual(len(opts), 0)
