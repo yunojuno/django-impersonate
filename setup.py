@@ -2,7 +2,7 @@ import os
 from distutils.core import setup
 
 project_name = 'impersonate'
-long_description = open('README.rst').read()
+long_description = open('README.md').read()
 
 # Idea from django-registration setup.py
 packages, data_files = [], []
@@ -21,7 +21,7 @@ for dirpath, dirnames, filenames in os.walk(project_name):
             pkg = pkg.replace(os.path.altsep, '.')
         packages.append(pkg)
     elif filenames:
-        prefix = dirpath[(len(project_name) + 1):]
+        prefix = dirpath[(len(project_name) + 1) :]
         for f in filenames:
             data_files.append(os.path.join(prefix, f))
 
@@ -35,7 +35,7 @@ setup(
     author='Peter Sanchez',
     author_email='pjs@petersanchez.com',
     license='BSD License',
-    url='https://hg.code.netlandish.com/~petersanchez/django-impersonate',
+    url='https://code.netlandish.com/~petersanchez/django-impersonate',
     long_description=long_description,
     platforms=['any'],
     classifiers=[
