@@ -3,7 +3,7 @@
 
 Simple application to allow superusers to "impersonate" other non-superuser accounts.
 
-**Version:** 1.5
+**Version:** 1.5.1
 
 **Author:** Peter Sanchez (<http://www.petersanchez.com>)
 
