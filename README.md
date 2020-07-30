@@ -422,6 +422,41 @@ And you should see:
     py38-django3.0: commands succeeded
     congratulations :)
 
+# Contributing
+
+We accept patches submitted via `hg email` which is the `patchbomb` extension
+included with Mercurial.
+
+Please see our [contributing document][cdoc] for more information.
+
+The mailing list where you submit your patches is
+`~petersanchez/public-inbox@lists.code.netlandish.com`. You can also view the
+archives on the web here:
+
+https://lists.code.netlandish.com/~petersanchez/public-inbox
+
+To quickly setup your clone of `django-impersonate` to submit to the mailing
+list just edit your `.hg/hgrc` file and add the following:
+
+    [email]
+    to = ~petersanchez/public-inbox@lists.code.netlandish.com
+
+    [patchbomb]
+    flagtemplate = "django-impersonate"
+
+    [diff]
+    git = 1
+
+We have more information on the topic here:
+
+- [Contributing][cdoc]
+- [Using email with Mercurial][hgemail]
+- [Mailing list etiquette][etiquette]
+
+[etiquette]: https://man.code.netlandish.com/lists/etiquette.md
+[hgemail]: https://man.code.netlandish.com/hg/email.md
+[cdoc]: https://man.code.netlandish.com/contributing.md
+
 Copyright & Warranty
 ====================
 
