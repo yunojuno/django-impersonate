@@ -6,6 +6,11 @@ non-superuser accounts.
 
 **Version:** 1.5.1
 
+**Project Links:**
+`Issues <https://todo.code.netlandish.com/~petersanchez/django-impersonate>`__
+- `Mailing
+List <https://lists.code.netlandish.com/~petersanchez/public-inbox>`__
+
 **Author:** Peter Sanchez (http://www.petersanchez.com)
 
 Python / Django Support
