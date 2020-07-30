@@ -5,7 +5,12 @@ Simple application to allow superusers to "impersonate" other non-superuser acco
 
 **Version:** 1.5.1
 
+**Project Links:** [Issues][issues] - [Mailing List][pinbox]
+
 **Author:** Peter Sanchez (<http://www.petersanchez.com>)
+
+[issues]: https://todo.code.netlandish.com/~petersanchez/django-impersonate
+[pinbox]: https://lists.code.netlandish.com/~petersanchez/public-inbox
 
 Python / Django Support
 =======================
