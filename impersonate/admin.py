@@ -1,12 +1,13 @@
 #  -*- coding: utf-8 -*-
 import logging
-from django.contrib import admin
-from django.utils.html import format_html
-from django.db.utils import NotSupportedError
 
-from .settings import settings
-from .models import ImpersonationLog
+from django.contrib import admin
+from django.db.utils import NotSupportedError
+from django.utils.html import format_html
+
 from .helpers import User, check_allow_impersonate
+from .models import ImpersonationLog
+from .settings import settings
 
 try:
     from django.urls import reverse
@@ -32,6 +33,7 @@ class SessionStateFilter(admin.SimpleListFilter):
         considered incomplete. This field is set from the
         session_end signal receiver.
     '''
+
     title = 'session state'
     parameter_name = 'session'
 
@@ -62,6 +64,7 @@ class ImpersonatorFilter(admin.SimpleListFilter):
         If the number of unique impersonators exceeds MAX_FILTER_SIZE,
         then the filter is removed (shows only 'All').
     '''
+
     title = 'impersonator'
     parameter_name = 'impersonator'
 
@@ -73,12 +76,10 @@ class ImpersonatorFilter(admin.SimpleListFilter):
         try:
             # Evaluate here to raise exception if needed
             ids = list(
-                model_admin.get_queryset(
-                    request,
-                ).order_by().values_list(
-                    'impersonator_id',
-                    flat=True,
-                ).distinct('impersonator_id')
+                model_admin.get_queryset(request,)
+                .order_by()
+                .values_list('impersonator_id', flat=True,)
+                .distinct('impersonator_id')
             )
         except (NotSupportedError, NotImplementedError):
             # Unit tests use sqlite db backend which doesn't support distinct.
@@ -87,16 +88,18 @@ class ImpersonatorFilter(admin.SimpleListFilter):
 
         if len(ids) > MAX_FILTER_SIZE:
             logger.debug(
-                ('Hiding admin list filter as number of impersonators [{0}] '
-                 'exceeds MAX_FILTER_SIZE [{1}]').format(
-                     len(ids),
-                     MAX_FILTER_SIZE,
-                 )
+                (
+                    'Hiding admin list filter as number of impersonators [{0}] '
+                    'exceeds MAX_FILTER_SIZE [{1}]'
+                ).format(
+                    len(ids), MAX_FILTER_SIZE,
+                )
             )
             return
 
-        impersonators = \
-            User.objects.filter(id__in=ids).order_by(User.USERNAME_FIELD)
+        impersonators = User.objects.filter(id__in=ids).order_by(
+            User.USERNAME_FIELD
+        )
         for i in impersonators:
             yield (i.id, friendly_name(i))
 
@@ -111,6 +114,7 @@ class UserAdminImpersonateMixin(object):
     ''' Mixin to easily add user impersonation support via the Django
         admin change list page.
     '''
+
     open_new_window = False
 
     def get_list_display(self, request):
@@ -129,16 +133,18 @@ class UserAdminImpersonateMixin(object):
             reverse('impersonate-start', args=[obj.id]),
             target,
         )
+
     impersonate_user.short_description = 'Impersonate User'
 
 
 class ImpersonationLogAdmin(admin.ModelAdmin):
+    list_select_related = ['impersonator', 'impersonating']
     list_display = (
         '_impersonator',
         '_impersonating',
         'session_key',
         'session_started_at',
-        'duration'
+        'duration',
     )
     readonly_fields = (
         'impersonator',
