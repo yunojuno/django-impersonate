@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 import logging
+
 from django.db.models import Q
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 
-from .settings import User, settings
 from .decorators import allowed_user_required
-from .signals import session_begin, session_end
 from .helpers import (
-    get_redir_path, get_redir_arg, get_paginator, get_redir_field,
-    check_allow_for_user, users_impersonable
+    check_allow_for_user, get_paginator, get_redir_arg, get_redir_field,
+    get_redir_path, users_impersonable,
 )
+from .settings import User, settings
+from .signals import session_begin, session_end
 
 logger = logging.getLogger(__name__)
 
@@ -26,13 +28,19 @@ def impersonate(request, uid):
         Also store the user's 'starting'/'original' URL so
         we can return them to it.
     '''
-    new_user = get_object_or_404(User, pk=uid)
+    try:
+        new_user = get_object_or_404(User, pk=uid)
+    except ValueError:
+        # Invalid uid value passed
+        logger.error(f'views/impersonate: Invalid value for uid given: {uid}')
+        raise Http404('Invalid value given.')
     if check_allow_for_user(request, new_user):
         request.session['_impersonate'] = new_user.pk
         prev_path = request.META.get('HTTP_REFERER')
         if prev_path:
-            request.session['_impersonate_prev_path'] = \
-                                request.build_absolute_uri(prev_path)
+            request.session[
+                '_impersonate_prev_path'
+            ] = request.build_absolute_uri(prev_path)
 
         request.session.modified = True  # Let's make sure...
         # can be used to hook up auditing of the session
@@ -40,7 +48,7 @@ def impersonate(request, uid):
             sender=None,
             impersonator=request.user,
             impersonating=new_user,
-            request=request
+            request=request,
         )
     return redirect(get_redir_path(request))
 
@@ -57,8 +65,10 @@ def stop_impersonate(request):
         except User.DoesNotExist:
             # Should never be reached.
             logger.info(
-                (u'NOTICE: User being impersonated (PK '
-                 u'{0}) no longer exists.').format(impersonating)
+                (
+                    u'NOTICE: User being impersonated (PK '
+                    u'{0}) no longer exists.'
+                ).format(impersonating)
             )
             impersonating = None
 
@@ -71,11 +81,14 @@ def stop_impersonate(request):
             sender=None,
             impersonator=request.impersonator,
             impersonating=impersonating,
-            request=request
+            request=request,
         )
 
-    dest = original_path \
-        if original_path and use_refer else get_redir_path(request)
+    dest = (
+        original_path
+        if original_path and use_refer
+        else get_redir_path(request)
+    )
     return redirect(dest)
 
 
@@ -93,14 +106,18 @@ def list_users(request, template):
 
     paginator, page, page_number = get_paginator(request, users)
 
-    return render(request, template, {
-        'users': users,
-        'paginator': paginator,
-        'page': page,
-        'page_number': page_number,
-        'redirect': get_redir_arg(request),
-        'redirect_field': get_redir_field(request),
-    })
+    return render(
+        request,
+        template,
+        {
+            'users': users,
+            'paginator': paginator,
+            'page': page,
+            'page_number': page_number,
+            'redirect': get_redir_arg(request),
+            'redirect_field': get_redir_field(request),
+        },
+    )
 
 
 @allowed_user_required
@@ -134,12 +151,16 @@ def search_users(request, template):
     users = users.filter(search_q).distinct()
     paginator, page, page_number = get_paginator(request, users)
 
-    return render(request, template, {
-        'users': users,
-        'paginator': paginator,
-        'page': page,
-        'page_number': page_number,
-        'query': query,
-        'redirect': get_redir_arg(request),
-        'redirect_field': get_redir_field(request),
-    })
+    return render(
+        request,
+        template,
+        {
+            'users': users,
+            'paginator': paginator,
+            'page': page,
+            'page_number': page_number,
+            'query': query,
+            'redirect': get_redir_arg(request),
+            'redirect_field': get_redir_field(request),
+        },
+    )

@@ -19,7 +19,6 @@
         is_superuser = False
         is_staff = False
 '''
-import sys
 from distutils.version import LooseVersion
 from unittest.mock import PropertyMock, patch
 from urllib.parse import urlencode, urlsplit
@@ -33,8 +32,9 @@ from django.test import TestCase
 from django.test.client import Client, RequestFactory
 from django.test.utils import override_settings
 
-from .admin import (ImpersonationLogAdmin, ImpersonatorFilter,
-                    SessionStateFilter)
+from .admin import (
+    ImpersonationLogAdmin, ImpersonatorFilter, SessionStateFilter,
+)
 from .helpers import duration_string, is_authenticated, users_impersonable
 from .models import ImpersonationLog
 from .signals import session_begin, session_end
@@ -332,6 +332,12 @@ class TestImpersonation(TestCase):
     def test_unsuccessful_request_unauth_user(self):
         response = self.client.get(reverse('impersonate-list'))
         self._redirect_check(response, '/accounts/login/')
+
+    def test_unsuccessful_request_invalid_user_value(self):
+        response = self._impersonate_helper(
+            'user1', 'foobar', 'some/bad/value'
+        )
+        self.assertEqual(response.status_code, 404)
 
     @override_settings(IMPERSONATE={'REDIRECT_URL': '/test-redirect/'})
     def test_successful_impersonation_redirect_url(self):
