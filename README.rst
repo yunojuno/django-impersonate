@@ -9,9 +9,10 @@ non-superuser accounts.
 **Project Links:**
 `Issues <https://todo.code.netlandish.com/~petersanchez/django-impersonate>`__
 - `Mailing
-List <https://lists.code.netlandish.com/~petersanchez/public-inbox>`__
+List <https://lists.code.netlandish.com/~petersanchez/public-inbox>`__ -
+`Contributing <#contributing>`__
 
-**Author:** Peter Sanchez (http://www.petersanchez.com)
+**Author:** Peter Sanchez (https://petersanchez.com)
 
 Python / Django Support
 =======================
