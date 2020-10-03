@@ -720,7 +720,7 @@ class TestImpersonation(TestCase):
         opts = [
             (_id, name) for _id, name in _filter.lookups(None, model_admin)
         ]
-        self.assertEqual(len(opts), 0)
+        self.assertEqual(len(opts), 1)
 
     def test_impersonatelog_admin_add_delete_permissions(self):
         model_admin = ImpersonationLogAdmin(ImpersonationLog, AdminSite())
