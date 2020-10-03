@@ -80,22 +80,23 @@ class ImpersonatorFilter(admin.SimpleListFilter):
                 .order_by()
                 .values_list('impersonator_id', flat=True,)
                 .distinct('impersonator_id')
-            )
+            )[:MAX_FILTER_SIZE]
         except (NotSupportedError, NotImplementedError):
             # Unit tests use sqlite db backend which doesn't support distinct.
-            qs = model_admin.get_queryset(request).only('impersonator_id')
+            qs = model_admin.get_queryset(request).only('impersonator_id')[
+                :MAX_FILTER_SIZE
+            ]
             ids = set([x.impersonator_id for x in qs])
 
         if len(ids) > MAX_FILTER_SIZE:
-            logger.debug(
+            logger.info(
                 (
-                    'Hiding admin list filter as number of impersonators [{0}] '
-                    'exceeds MAX_FILTER_SIZE [{1}]'
+                    'Limiting admin list filter as number of impersonators '
+                    '[{0}] exceeds MAX_FILTER_SIZE [{1}]'
                 ).format(
                     len(ids), MAX_FILTER_SIZE,
                 )
             )
-            return
 
         impersonators = User.objects.filter(id__in=ids).order_by(
             User.USERNAME_FIELD

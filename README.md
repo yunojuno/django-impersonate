@@ -361,8 +361,8 @@ It is optional, and defaults to False (i.e. logging is enabled).
     MAX_FILTER_SIZE
 
 The max number of items acceptable in the admin list filters. If the
-number of items exceeds this, then the filter is removed (just shows
-all). This is used by the "Filter by impersonator" filter.
+number of items exceeds this, then the filter list is the size of the settings
+value. This is used by the "Filter by impersonator" filter.
 
 It is optional, and defaults to 100.
 
