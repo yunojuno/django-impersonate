@@ -165,5 +165,18 @@ class ImpersonationLogAdmin(admin.ModelAdmin):
     def _impersonating(self, obj):
         return friendly_name(obj.impersonating)
 
+    def has_add_permission(self, request):
+        return settings.ADMIN_ADD_PERMISSION
+
+    def has_delete_permission(self, request, obj=None):
+        return settings.ADMIN_DELETE_PERMISSION
+
+    # hack to show records but limit updating.
+    # `return False` hides impersonates module in admin page
+    def has_change_permission(self, request, obj=None):
+        if settings.ADMIN_READ_ONLY:
+            return request.method in ['GET', 'HEAD']
+        return True
+
 
 admin.site.register(ImpersonationLog, ImpersonationLogAdmin)
