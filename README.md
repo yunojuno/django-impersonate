@@ -3,7 +3,7 @@
 
 Simple application to allow superusers to "impersonate" other non-superuser accounts.
 
-**Version:** 1.5.1
+**Version:** 1.6
 
 **Project Links:** [Issues][issues] - [Mailing List][pinbox] -
 [Contributing](#contributing)
@@ -16,7 +16,7 @@ Simple application to allow superusers to "impersonate" other non-superuser acco
 Python / Django Support
 =======================
 
--   Python 3.6+ for Django versions 1.11, 2.2 and 3.0
+-   Python 3.6+ for Django versions 2.2+
 
 **Note:** As of version 1.4 we are only officially supporting Python
 3.6+ and following the Django support schedule. Meaning we can only
@@ -31,6 +31,9 @@ Dependencies
 
 **NOTE:**
 
+-   **Version 1.6** has officially removed support for the old settings format.
+	Please see the [settings](#settings) section for how settings should be
+	configured.
 -   **Version 1.5 is now only officially supporting Django's 1.11, 2.2,
     and 3.0**
 -   **Version 1.4 is now officially supporting Python 3.6+ and Django
@@ -362,6 +365,27 @@ number of items exceeds this, then the filter is removed (just shows
 all). This is used by the "Filter by impersonator" filter.
 
 It is optional, and defaults to 100.
+
+    ADMIN_DELETE_PERMISSION
+
+A boolean to enable/disable deletion of impersonation logs in the Django admin.
+
+Default is `False`
+
+    ADMIN_ADD_PERMISSION
+
+A boolean to enable/disable ability to add impersonation logs in the Django
+admin.
+
+Default is `False`
+
+    ADMIN_READ_ONLY
+
+A boolean to enable/disable "read only" mode of impersonation logs in the
+Django admin. Generally you want to leave this enabled otherwise admin users
+can alter logs within the Django admin area.
+
+Default is `True`
 
 Admin
 =====
