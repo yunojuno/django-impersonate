@@ -62,7 +62,7 @@ class ImpersonatorFilter(admin.SimpleListFilter):
         very large set of users.
 
         If the number of unique impersonators exceeds MAX_FILTER_SIZE,
-        then the filter is removed (shows only 'All').
+        then the users are limited to the value of MAX_FILTER_SIZE.
     '''
 
     title = 'impersonator'
