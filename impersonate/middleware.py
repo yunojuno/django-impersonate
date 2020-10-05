@@ -2,9 +2,7 @@
 from django.http import HttpResponseNotAllowed
 from django.utils.deprecation import MiddlewareMixin
 
-from .helpers import (
-    User, check_allow_for_uri, check_allow_for_user, is_authenticated,
-)
+from .helpers import User, check_allow_for_uri, check_allow_for_user
 from .settings import settings
 
 
@@ -13,10 +11,7 @@ class ImpersonateMiddleware(MiddlewareMixin):
         request.user.is_impersonate = False
         request.impersonator = None
 
-        if (
-            is_authenticated(request.user)
-            and '_impersonate' in request.session
-        ):
+        if request.user.is_authenticated and '_impersonate' in request.session:
             new_user_id = request.session['_impersonate']
             if isinstance(new_user_id, User):
                 # Edge case for issue 15

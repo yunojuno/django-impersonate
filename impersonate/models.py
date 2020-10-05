@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from django.db import models
 from django.conf import settings
+from django.utils.duration import duration_string
 
 
 class ImpersonationLog(models.Model):
@@ -46,7 +47,6 @@ class ImpersonationLog(models.Model):
         return self._duration()
 
     def _duration(self):
-        from .helpers import duration_string
         if all((self.session_started_at, self.session_ended_at)):
             return duration_string(
                 self.session_ended_at - self.session_started_at,
