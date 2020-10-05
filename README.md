@@ -237,6 +237,14 @@ impersonate another user. If this is not present it will check for the
 LOGIN_REDIRECT_URL setting and fall back to '/' if neither is present.
 Value should be a string containing the redirect path.
 
+    READ_ONLY
+
+A boolean that if set to `True` any requests that are not either `GET` or
+`HEAD` will result in a "Bad Request" response (status code 405). Use this if
+you want to limit your impersonating users to read only impersonation sessions.
+
+Value should be a boolean, defaults to `False`
+
     USE_HTTP_REFERER
 
 If this is set to `True`, then the app will attempt to be redirect you to
@@ -441,15 +449,15 @@ need tox.:
 
 And you should see:
 
-    py36-django1.11: commands succeeded
     py36-django2.2: commands succeeded
     py36-django3.0: commands succeeded
-    py37-django1.11: commands succeeded
+    py36-django3.1: commands succeeded
     py37-django2.2: commands succeeded
     py37-django3.0: commands succeeded
-    py38-django1.11: commands succeeded
+    py37-django3.1: commands succeeded
     py38-django2.2: commands succeeded
     py38-django3.0: commands succeeded
+    py38-django3.1: commands succeeded
     congratulations :)
 
 # Contributing

@@ -19,6 +19,7 @@ _settings = {
     'LOOKUP_TYPE': 'icontains',
     'SEARCH_FIELDS': [username_field, 'first_name', 'last_name', 'email'],
     'REDIRECT_URL': getattr(django_settings, 'LOGIN_REDIRECT_URL', u'/'),
+    'READ_ONLY': False,
     'ADMIN_DELETE_PERMISSION': False,
     'ADMIN_ADD_PERMISSION': False,
     'ADMIN_READ_ONLY': True,
