@@ -31,11 +31,12 @@ from django.http import HttpResponse
 from django.test import TestCase
 from django.test.client import Client, RequestFactory
 from django.test.utils import override_settings
+from django.utils.duration import duration_string
 
 from .admin import (
     ImpersonationLogAdmin, ImpersonatorFilter, SessionStateFilter,
 )
-from .helpers import duration_string, is_authenticated, users_impersonable
+from .helpers import users_impersonable
 from .models import ImpersonationLog
 from .signals import session_begin, session_end
 
@@ -63,7 +64,7 @@ def test_allow(request):
     ''' Used via the IMPERSONATE['CUSTOM_ALLOW'] setting.
         Simple check for the user to be auth'd and a staff member.
     '''
-    return is_authenticated(request.user) and request.user.is_staff
+    return request.user.is_authenticated and request.user.is_staff
 
 
 def test_allow2(request):
