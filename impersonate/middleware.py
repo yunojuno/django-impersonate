@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
+from django.http import HttpResponseNotAllowed
 from django.utils.deprecation import MiddlewareMixin
 
 from .helpers import (
     User, check_allow_for_uri, check_allow_for_user, is_authenticated,
 )
+from .settings import settings
 
 
 class ImpersonateMiddleware(MiddlewareMixin):
@@ -24,6 +26,9 @@ class ImpersonateMiddleware(MiddlewareMixin):
                 new_user = User.objects.get(pk=new_user_id)
             except User.DoesNotExist:
                 return
+
+            if settings.READ_ONLY and request.method not in ['GET', 'HEAD']:
+                return HttpResponseNotAllowed(['GET', 'HEAD'])
 
             if check_allow_for_user(request, new_user) and check_allow_for_uri(
                 request.path

@@ -4,7 +4,7 @@ django-impersonate |nlshield|
 Simple application to allow superusers to "impersonate" other
 non-superuser accounts.
 
-**Version:** 1.5.1
+**Version:** 1.6
 
 **Project Links:**
 `Issues <https://todo.code.netlandish.com/~petersanchez/django-impersonate>`__
@@ -17,7 +17,7 @@ List <https://lists.code.netlandish.com/~petersanchez/public-inbox>`__ -
 Python / Django Support
 =======================
 
--  Python 3.6+ for Django versions 1.11, 2.2 and 3.0
+-  Python 3.6+ for Django versions 2.2+
 
 **Note:** As of version 1.4 we are only officially supporting Python
 3.6+ and following the Django support schedule. Meaning we can only
@@ -32,6 +32,9 @@ Dependencies
 
 **NOTE:**
 
+-  **Version 1.6** has officially removed support for the old settings
+   format. Please see the `settings <#settings>`__ section for how
+   settings should be configured.
 -  **Version 1.5 is now only officially supporting Django's 1.11, 2.2,
    and 3.0**
 -  **Version 1.4 is now officially supporting Python 3.6+ and Django
@@ -264,6 +267,17 @@ Value should be a string containing the redirect path.
 
 ::
 
+    READ_ONLY
+
+A boolean that if set to ``True`` any requests that are not either
+``GET`` or ``HEAD`` will result in a "Bad Request" response (status code
+405). Use this if you want to limit your impersonating users to read
+only impersonation sessions.
+
+Value should be a boolean, defaults to ``False``
+
+::
+
     USE_HTTP_REFERER
 
 If this is set to ``True``, then the app will attempt to be redirect you
@@ -417,10 +431,38 @@ It is optional, and defaults to False (i.e. logging is enabled).
     MAX_FILTER_SIZE
 
 The max number of items acceptable in the admin list filters. If the
-number of items exceeds this, then the filter is removed (just shows
-all). This is used by the "Filter by impersonator" filter.
+number of items exceeds this, then the filter list is the size of the
+settings value. This is used by the "Filter by impersonator" filter.
 
 It is optional, and defaults to 100.
+
+::
+
+    ADMIN_DELETE_PERMISSION
+
+A boolean to enable/disable deletion of impersonation logs in the Django
+admin.
+
+Default is ``False``
+
+::
+
+    ADMIN_ADD_PERMISSION
+
+A boolean to enable/disable ability to add impersonation logs in the
+Django admin.
+
+Default is ``False``
+
+::
+
+    ADMIN_READ_ONLY
+
+A boolean to enable/disable "read only" mode of impersonation logs in
+the Django admin. Generally you want to leave this enabled otherwise
+admin users can alter logs within the Django admin area.
+
+Default is ``True``
 
 Admin
 =====
@@ -486,15 +528,15 @@ And you should see:
 
 ::
 
-    py36-django1.11: commands succeeded
     py36-django2.2: commands succeeded
     py36-django3.0: commands succeeded
-    py37-django1.11: commands succeeded
+    py36-django3.1: commands succeeded
     py37-django2.2: commands succeeded
     py37-django3.0: commands succeeded
-    py38-django1.11: commands succeeded
+    py37-django3.1: commands succeeded
     py38-django2.2: commands succeeded
     py38-django3.0: commands succeeded
+    py38-django3.1: commands succeeded
     congratulations :)
 
 Contributing
