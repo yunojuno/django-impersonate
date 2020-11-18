@@ -1,6 +1,10 @@
 Changes
 -------
 
+1.6.0 (2020-11-18)
+
+https://todo.code.netlandish.com/~petersanchez/django-impersonate?search=status%3Aclosed%20label%3A%221.6%22
+
 1.4.0 (2019-01-12)
 
 - Officially support Python 3.6+ and Django 1.11+
