@@ -69,7 +69,7 @@ def users_impersonable(request):
         return custom_queryset_func(request)
     else:
         qs = User.objects.all()
-        if not User._meta.ordering:
+        if not qs.query.order_by:
             qs = qs.order_by('pk')
         return qs
 

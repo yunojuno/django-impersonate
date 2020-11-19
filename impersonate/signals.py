@@ -11,19 +11,18 @@ from .models import ImpersonationLog
 logger = logging.getLogger(__name__)
 
 # signal sent when an impersonation session begins
-session_begin = Signal(
-    providing_args=['impersonator', 'impersonating', 'request']
-)
+# providing_args=['impersonator', 'impersonating', 'request']
+session_begin = Signal()
 
 # signal sent when an impersonation session ends
-session_end = Signal(
-    providing_args=['impersonator', 'impersonating', 'request']
-)
+# providing_args=['impersonator', 'impersonating', 'request']
+session_end = Signal()
 
+ID_LENGTH = 12
 
 def gen_unique_id():
     return hashlib.sha1(
-        u'{0}:{1}'.format(get_random_string(), tz_now()).encode('utf-8')
+        u'{0}:{1}'.format(get_random_string(ID_LENGTH), tz_now()).encode('utf-8')
     ).hexdigest()
 
 

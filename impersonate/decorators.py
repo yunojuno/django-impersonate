@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
+from urllib.parse import quote
 from django.conf import settings
-from django.utils.http import urlquote
 from django.utils.encoding import force_str
 from django.shortcuts import redirect, resolve_url
 from django.contrib.auth import REDIRECT_FIELD_NAME
@@ -18,7 +18,7 @@ def allowed_user_required(view_func):
             return redirect(u'{0}?{1}={2}'.format(
                 get_login_url(),
                 REDIRECT_FIELD_NAME,
-                urlquote(request.get_full_path()),
+                quote(request.get_full_path()),
             ))
 
         if getattr(request.user, 'is_impersonate', False):
