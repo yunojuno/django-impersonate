@@ -24,7 +24,7 @@ from unittest.mock import PropertyMock, patch
 from urllib.parse import urlencode, urlsplit
 
 import django
-from django.conf.urls import include, url
+from django.urls import include, path
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth import get_user_model
 from django.http import HttpResponse
@@ -54,9 +54,9 @@ def test_view(request):
 
 
 urlpatterns = [
-    url(r'^test-view/$', test_view, name='impersonate-test'),
-    url(r'^another-view/$', test_view, name='another-test-view'),
-    url('^', include('impersonate.urls')),
+    path('test-view/', test_view, name='impersonate-test'),
+    path('another-view/', test_view, name='another-test-view'),
+    path('', include('impersonate.urls')),
 ]
 
 
@@ -78,7 +78,7 @@ def test_qs(request):
     ''' Used via the IMPERSONAT['CUSTOM_USER_QUERYSET'] setting.
         Simple function to return all users.
     '''
-    return User.objects.all()
+    return User.objects.all().order_by('pk')
 
 
 class UserFactory(object):
@@ -103,8 +103,12 @@ class TestMiddleware(TestCase):
             username='superuser', is_superuser=True,
         )
         self.user = UserFactory.create(username='regular')
+
         self.factory = RequestFactory()
-        self.middleware = ImpersonateMiddleware()
+
+        def dummy_get_response(request):
+            return None
+        self.middleware = ImpersonateMiddleware(dummy_get_response)
 
     def _impersonated_request(self, use_id=True):
         request = self.factory.get('/')
