@@ -23,6 +23,7 @@ _settings = {
     'ADMIN_DELETE_PERMISSION': False,
     'ADMIN_ADD_PERMISSION': False,
     'ADMIN_READ_ONLY': True,
+    'MAX_DURATION': None,
 }
 
 
