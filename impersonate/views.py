@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 import logging
+from datetime import datetime
 
 from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 
 from .decorators import allowed_user_required
 from .helpers import (
@@ -36,6 +38,9 @@ def impersonate(request, uid):
         raise Http404('Invalid value given.')
     if check_allow_for_user(request, new_user):
         request.session['_impersonate'] = new_user.pk
+        request.session['_impersonate_start'] = datetime.now(
+            tz=timezone.utc
+        ).timestamp()
         prev_path = request.META.get('HTTP_REFERER')
         if prev_path:
             request.session[

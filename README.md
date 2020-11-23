@@ -395,6 +395,13 @@ can alter logs within the Django admin area.
 
 Default is `True`
 
+    MAX_DURATION
+
+A number specifying the maximum allowed duration of impersonation
+sessions in **seconds**.
+
+Default is `None`
+
 Admin
 =====
 

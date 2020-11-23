@@ -19,18 +19,19 @@
         is_superuser = False
         is_staff = False
 '''
+from datetime import datetime, timedelta, timezone
 from distutils.version import LooseVersion
 from unittest.mock import PropertyMock, patch
 from urllib.parse import urlencode, urlsplit
 
 import django
-from django.urls import include, path
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth import get_user_model
 from django.http import HttpResponse
 from django.test import TestCase
 from django.test.client import Client, RequestFactory
 from django.test.utils import override_settings
+from django.urls import include, path
 from django.utils.duration import duration_string
 
 from .admin import (
@@ -108,13 +109,15 @@ class TestMiddleware(TestCase):
 
         def dummy_get_response(request):
             return None
+
         self.middleware = ImpersonateMiddleware(dummy_get_response)
 
-    def _impersonated_request(self, use_id=True):
+    def _impersonated_request(self, use_id=True, _impersonate_start=None):
         request = self.factory.get('/')
         request.user = self.superuser
         request.session = {
             '_impersonate': self.user.pk if use_id else self.user,
+            '_impersonate_start': _impersonate_start,
         }
         self.middleware.process_request(request)
 
@@ -132,6 +135,47 @@ class TestMiddleware(TestCase):
             See Issue #15
         '''
         self._impersonated_request(use_id=False)
+
+    @override_settings(IMPERSONATE={'MAX_DURATION': 3600})
+    def test_impersonated_request_with_max_duration(self):
+        self._impersonated_request(
+            _impersonate_start=datetime.now(timezone.utc).timestamp()
+        )
+
+    @override_settings(IMPERSONATE={'MAX_DURATION': 3600})
+    def test_reject_without_start_time(self):
+        ''' Test to ensure that requests without a start time
+            are rejected when MAX_DURATION is set
+        '''
+        request = self.factory.get('/')
+        request.user = self.superuser
+        request.session = {
+            '_impersonate': self.user.pk,
+        }
+        self.middleware.process_request(request)
+
+        self.assertEqual(request.user, self.superuser)
+        self.assertFalse(request.user.is_impersonate)
+
+    @override_settings(IMPERSONATE={'MAX_DURATION': 3600})
+    def test_reject_expired_impersonation(self):
+        ''' Test to ensure that requests with a start time before (now - MAX_DURATION)
+            are rejected
+        '''
+        request = self.factory.get('/')
+        request.user = self.superuser
+        request.session = {
+            '_impersonate': self.user.pk,
+            '_impersonate_start': (
+                datetime.now(timezone.utc) - timedelta(seconds=3601)
+            ).timestamp(),
+        }
+        self.middleware.process_request(request)
+
+        self.assertEqual(request.user, self.superuser)
+        self.assertFalse(request.user.is_impersonate)
+        self.assertNotIn('_impersonate', request.session)
+        self.assertNotIn('_impersonate_start', request.session)
 
     def test_not_impersonated_request(self, use_id=True):
         """Check the real_user request attr is set correctly when **not** impersonating."""
