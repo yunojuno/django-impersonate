@@ -87,7 +87,7 @@ def on_session_end(sender, **kwargs):
         log.session_ended_at = tz_now()
         log.save()
     except ImpersonationLog.DoesNotExist:
-        logger.warning(
+        logger.debug(
             (u'Unfinished ImpersonationLog could not be found for: '
              u'{0}, {1}, {2}').format(
                  impersonator,
@@ -96,7 +96,7 @@ def on_session_end(sender, **kwargs):
              )
         )
     except ImpersonationLog.MultipleObjectsReturned:
-        logger.warning(
+        logger.debug(
             (u'Multiple unfinished ImpersonationLog matching: '
              u'{0}, {1}, {2}').format(
                  impersonator,
