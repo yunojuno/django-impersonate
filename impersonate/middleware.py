@@ -14,7 +14,7 @@ class ImpersonateMiddleware(MiddlewareMixin):
         request.user.is_impersonate = False
         request.impersonator = None
 
-        if request.user.is_authenticated and '_impersonate' in request.session:
+        if '_impersonate' in request.session and request.user.is_authenticated:
             if settings.MAX_DURATION:
                 if '_impersonate_start' not in request.session:
                     return
