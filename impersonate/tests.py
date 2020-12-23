@@ -170,12 +170,9 @@ class TestMiddleware(TestCase):
                 datetime.now(timezone.utc) - timedelta(seconds=3601)
             ).timestamp(),
         }
-        self.middleware.process_request(request)
-
-        self.assertEqual(request.user, self.superuser)
-        self.assertFalse(request.user.is_impersonate)
-        self.assertNotIn('_impersonate', request.session)
-        self.assertNotIn('_impersonate_start', request.session)
+        response = self.middleware.process_request(request)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.get('Location'), reverse('impersonate-stop'))
 
     def test_not_impersonated_request(self, use_id=True):
         """Check the real_user request attr is set correctly when **not** impersonating."""
@@ -264,8 +261,10 @@ class TestImpersonation(TestCase):
     def test_successful_impersonation(self):
         self._impersonate_helper('user1', 'foobar', 4)
         self.assertEqual(self.client.session['_impersonate'], 4)
+        self.assertIn('_impersonate_start', self.client.session)
         self.client.get(reverse('impersonate-stop'))
         self.assertEqual(self.client.session.get('_impersonate'), None)
+        self.assertNotIn('_impersonate_start', self.client.session)
         self.client.logout()
 
     def test_successful_impersonation_signals(self):

@@ -77,11 +77,12 @@ def stop_impersonate(request):
             )
             impersonating = None
 
-    original_path = request.session.pop('_impersonate_prev_path', None)
     use_refer = settings.USE_HTTP_REFERER
+    request.session.pop('_impersonate_start', None)
+    original_path = request.session.pop('_impersonate_prev_path', None)
+    request.session.modified = True
 
     if impersonating is not None:
-        request.session.modified = True
         session_end.send(
             sender=None,
             impersonator=request.impersonator,
@@ -94,6 +95,7 @@ def stop_impersonate(request):
         if original_path and use_refer
         else get_redir_path(request)
     )
+
     return redirect(dest)
 
 
