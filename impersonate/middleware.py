@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from django.http import HttpResponseNotAllowed
 from django.utils import timezone
 from django.utils.deprecation import MiddlewareMixin
+from django.utils.functional import SimpleLazyObject
 
 from .helpers import User, check_allow_for_uri, check_allow_for_user
 from .settings import settings
@@ -11,7 +12,15 @@ from .settings import settings
 
 class ImpersonateMiddleware(MiddlewareMixin):
     def process_request(self, request):
-        request.user.is_impersonate = False
+        _usr = request.user  # save as local var to prevent infinite recursion
+
+        def _get_usr():
+            # This is all to avoid querying for the "User" instance before
+            # it's actually necessary.
+            _usr.is_impersonate = False
+            return _usr
+
+        request.user = SimpleLazyObject(_get_usr)
         request.impersonator = None
 
         if '_impersonate' in request.session and request.user.is_authenticated:
