@@ -3,7 +3,7 @@
 
 Simple application to allow superusers to "impersonate" other non-superuser accounts.
 
-**Version:** 1.7
+**Version:** 1.7.1
 
 **Project Links:** [Issues][issues] - [Mailing List][pinbox] -
 [Contributing](#contributing)
@@ -471,8 +471,6 @@ And you should see:
 
 We accept patches submitted via `hg email` which is the `patchbomb` extension
 included with Mercurial.
-
-Please see our [contributing document][cdoc] for more information.
 
 The mailing list where you submit your patches is
 `~petersanchez/public-inbox@lists.code.netlandish.com`. You can also view the
