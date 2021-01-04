@@ -234,7 +234,7 @@ Here are the options available...
 
 This is the URL you want to be redirected to *after* you have chosen to
 impersonate another user. If this is not present it will check for the
-LOGIN_REDIRECT_URL setting and fall back to '/' if neither is present.
+`LOGIN_REDIRECT_URL` setting and fall back to '/' if neither is present.
 Value should be a string containing the redirect path.
 
     READ_ONLY
