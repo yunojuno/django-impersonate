@@ -1,7 +1,7 @@
 django-impersonate |nlshield|
 -----------------------------
 
-Simple application to allow superusers to “impersonate” other
+Simple application to allow superusers to "impersonate" other
 non-superuser accounts.
 
 **Version:** 1.7.1
@@ -35,7 +35,7 @@ Dependencies
 -  **Version 1.6** has officially removed support for the old settings
    format. Please see the `settings <#settings>`__ section for how
    settings should be configured.
--  **Version 1.5 is now only officially supporting Django’s 1.11, 2.2,
+-  **Version 1.5 is now only officially supporting Django's 1.11, 2.2,
    and 3.0**
 -  **Version 1.4 is now officially supporting Python 3.6+ and Django
    1.11+**
@@ -82,10 +82,10 @@ variable to include a directory where the impersonate directory lives.
 Use
 ===
 
-1. Add ``impersonate`` to your INSTALLED_APPS
-2. Add ``impersonate.middleware.ImpersonateMiddleware`` to your
+#. Add ``impersonate`` to your INSTALLED_APPS
+#. Add ``impersonate.middleware.ImpersonateMiddleware`` to your
    ``MIDDLEWARE`` setting.
-3. Add ``impersonate.urls`` somewhere in your url structure. Example:
+#. Add ``impersonate.urls`` somewhere in your url structure. Example:
 
    ::
 
@@ -109,9 +109,9 @@ Functionality
 
 Replace <user-id> with the user id of the user you want to impersonate.
 
-While in impersonation “mode” the ``request.user`` object will have an
+While in impersonation "mode" the ``request.user`` object will have an
 ``is_impersonate`` attribute set to ``True``. So if you wanted to check
-in your templates or view, you just do something like…:
+in your templates or view, you just do something like...:
 
 ::
 
@@ -173,7 +173,7 @@ template tag as ``impersonate-list``.
 
    /impersonate/search/
 
-This will render the template ‘impersonate/search_users.html’ and will
+This will render the template 'impersonate/search_users.html' and will
 pass the following in the context:
 
 -  ``users`` - queryset of all users
@@ -254,7 +254,7 @@ For example:
        'PAGINATE_COUNT': 10,
    }
 
-Here are the options available…
+Here are the options available...
 
 ::
 
@@ -262,15 +262,15 @@ Here are the options available…
 
 This is the URL you want to be redirected to *after* you have chosen to
 impersonate another user. If this is not present it will check for the
-LOGIN_REDIRECT_URL setting and fall back to ‘/’ if neither is present.
-Value should be a string containing the redirect path.
+``LOGIN_REDIRECT_URL`` setting and fall back to '/' if neither is
+present. Value should be a string containing the redirect path.
 
 ::
 
    READ_ONLY
 
 A boolean that if set to ``True`` any requests that are not either
-``GET`` or ``HEAD`` will result in a “Bad Request” response (status code
+``GET`` or ``HEAD`` will result in a "Bad Request" response (status code
 405). Use this if you want to limit your impersonating users to read
 only impersonation sessions.
 
@@ -283,8 +283,8 @@ Value should be a boolean, defaults to ``False``
 If this is set to ``True``, then the app will attempt to be redirect you
 to the URL you were at when the impersonation began once you have
 *stopped* the impersonation. For example, if you were at the url
-‘/foo/bar/’ when you began impersonating a user, once you end the
-impersonation, you will be redirected back to ‘/foo/bar/’ instead of the
+'/foo/bar/' when you began impersonating a user, once you end the
+impersonation, you will be redirected back to '/foo/bar/' instead of the
 value in ``REDIRECT_URL``.
 
 Value should be a boolean, defaults to ``False``
@@ -351,13 +351,13 @@ queryset can be impersonated.
 
 This function will not be called when the request has an unauthorised
 users, and will only be called when the user is allowed to impersonate
-(cf. ``REQUIRE_SUPERUSER`` and ``CUSTOM_ALLOW``).
+(cf. ``REQUIRE_SUPERUSER`` and ``CUSTOM_ALLOW``).
 
 Regardless of what this function returns, a user cannot impersonate a
 superuser, even if there are superusers in the returned QuerySet.
 
 It is optional, and if it is not present, the user can impersonate any
-user (i.e. the default is ``User.objects.all()``).
+user (i.e. the default is ``User.objects.all()``).
 
 ::
 
@@ -405,8 +405,8 @@ your case requires.
 
 Array of user model fields used for building searching query. Default
 value is [``User.USERNAME_FIELD``, ``first_name``, ``last_name``,
-``email``]. If the User model doesn’t have the ``USERNAME_FIELD``
-attribute, it falls back to ‘username’ (< Django 1.5).
+``email``]. If the User model doesn't have the ``USERNAME_FIELD``
+attribute, it falls back to 'username' (< Django 1.5).
 
 ::
 
@@ -424,7 +424,7 @@ sessions. By default each impersonation ``session_begin`` signal will
 create a new ``ImpersonationLog`` object, which is closed out (duration
 calculated) at the corresponding ``session_end`` signal.
 
-It is optional, and defaults to False (i.e. logging is enabled).
+It is optional, and defaults to False (i.e. logging is enabled).
 
 ::
 
@@ -432,7 +432,7 @@ It is optional, and defaults to False (i.e. logging is enabled).
 
 The max number of items acceptable in the admin list filters. If the
 number of items exceeds this, then the filter list is the size of the
-settings value. This is used by the “Filter by impersonator” filter.
+settings value. This is used by the "Filter by impersonator" filter.
 
 It is optional, and defaults to 100.
 
@@ -458,7 +458,7 @@ Default is ``False``
 
    ADMIN_READ_ONLY
 
-A boolean to enable/disable “read only” mode of impersonation logs in
+A boolean to enable/disable "read only" mode of impersonation logs in
 the Django admin. Generally you want to leave this enabled otherwise
 admin users can alter logs within the Django admin area.
 
@@ -478,9 +478,9 @@ Admin
 
 As of version 1.3 django-impersonate now includes a helper admin mixin,
 located at ``impersonate.admin.UserAdminImpersonateMixin``, to include
-in your User model’s ModelAdmin. This provides a direct link to
-impersonate users from your user model’s Django admin list view. Using
-it is very simple, however if you’re using the default
+in your User model's ModelAdmin. This provides a direct link to
+impersonate users from your user model's Django admin list view. Using
+it is very simple, however if you're using the default
 ``django.contrib.auth.models.User`` model you will need to unregister
 the old ModelAdmin before registering your own.
 
@@ -489,7 +489,7 @@ The ``UserAdminImpersonateMixin`` has a attribute named
 True a new window will be opened to start the new impersonation session
 when clicking the impersonate link directly in the admin.
 
-Here’s an example:
+Here's an example:
 
 ::
 
@@ -525,7 +525,7 @@ To get test coverage, use:
    $ coverage html  <- Pretty HTML files for you
    $ coverage report -m  <- Ascii report
 
-If you’re bored and want to test all the supported environments, you’ll
+If you're bored and want to test all the supported environments, you'll
 need tox.:
 
 ::
@@ -594,7 +594,7 @@ Commercial Support
 ------------------
 
 This software, and lots of other software like it, has been built in
-support of many of Netlandish’s own projects, and the projects of our
+support of many of Netlandish's own projects, and the projects of our
 clients. We would love to help you on your next project so get in touch
 by dropping us a note at hello@netlandish.com.
 
