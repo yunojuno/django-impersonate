@@ -56,5 +56,6 @@ class ImpersonateMiddleware(MiddlewareMixin):
                 request.impersonator = request.user
                 request.user = new_user
                 request.user.is_impersonate = True
+                request.user.impersonator = request.impersonator
 
         request.real_user = request.impersonator or request.user

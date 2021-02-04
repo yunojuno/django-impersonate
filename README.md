@@ -102,12 +102,14 @@ Replace &lt;user-id&gt; with the user id of the user you want to
 impersonate.
 
 While in impersonation "mode" the `request.user` object will have an
-`is_impersonate` attribute set to `True`. So if you wanted to check in
+`is_impersonate` attribute set to `True` as well as `impersonator` (and also
+`request.impersonator`) set to the original user. So if you wanted to check in
 your templates or view, you just do something like...:
 
     {% if user.is_impersonate %} .... {% endif %}
 
-The original user is available as `request.impersonator`:
+The original user is available as `user.impersonator` or
+`request.impersonator`:
 
     {{ request.user }} ({{ request.impersonator }})
 

@@ -124,6 +124,7 @@ class TestMiddleware(TestCase):
         # Check request.user and request.user.real_user
         self.assertEqual(request.user, self.user)
         self.assertEqual(request.impersonator, self.superuser)
+        self.assertEqual(request.user.impersonator, self.superuser)
         self.assertEqual(request.real_user, self.superuser)
         self.assertTrue(request.user.is_impersonate)
 
