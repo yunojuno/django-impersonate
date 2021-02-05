@@ -1,7 +1,22 @@
 Changes
 -------
 
-1.7.0 (2020-25-20)
+1.7.3 (2021-02-05)
+
+Added `impersonator` object to `request.user`
+
+https://lists.code.netlandish.com/~petersanchez/public-inbox/patches/8
+
+1.7.2 (2021-01-04)
+
+Removing smart quotes from README.rst for edge cases on systems with odd 
+unicode settings.
+
+1.7.1 (2020-12-23)
+
+https://todo.code.netlandish.com/~petersanchez/django-impersonate?search=status%3Aclosed+label%3A%221.7.1%22
+
+1.7.0 (2020-11-25)
 
 https://todo.code.netlandish.com/~petersanchez/django-impersonate?search=status%3Aclosed+label%3A%221.7%22
 

@@ -3,7 +3,7 @@
 
 Simple application to allow superusers to "impersonate" other non-superuser accounts.
 
-**Version:** 1.7.1
+**Version:** 1.7.3
 
 **Project Links:** [Issues][issues] - [Mailing List][pinbox] -
 [Contributing](#contributing)
