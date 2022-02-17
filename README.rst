@@ -540,15 +540,16 @@ And you should see:
 
 ::
 
-   py36-django2.2: commands succeeded
-   py36-django3.0: commands succeeded
-   py36-django3.1: commands succeeded
    py37-django2.2: commands succeeded
-   py37-django3.0: commands succeeded
-   py37-django3.1: commands succeeded
+   py37-django3.2: commands succeeded
    py38-django2.2: commands succeeded
-   py38-django3.0: commands succeeded
-   py38-django3.1: commands succeeded
+   py38-django3.2: commands succeeded
+   py39-django2.2: commands succeeded
+   py39-django3.2: commands succeeded
+   py38-django4.0: commands succeeded
+   py39-django4.0: commands succeeded
+   py310-django3.2: commands succeeded
+   py310-django4.0: commands succeeded
    congratulations :)
 
 Contributing

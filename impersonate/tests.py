@@ -50,6 +50,13 @@ User = get_user_model()
 django_version_loose = LooseVersion(django.get_version())
 
 
+def _get_location(response):
+    # For 2.2 compat. Remove once 2.2 support is EOL
+    if hasattr(response, 'headers'):
+        return response.headers['location']
+    return response._headers['location'][1]
+
+
 def test_view(request):
     return HttpResponse('OK {0}'.format(request.user))
 
@@ -439,7 +446,7 @@ class TestImpersonation(TestCase):
             # compare querystrings
             self.assertEqual(
                 'http://testserver{0}'.format(starting_url),
-                response._headers['location'][1],
+                _get_location(response),
             )
             self.assertEqual(self.client.session.get('_impersonate'), None)
             self.client.logout()
@@ -465,12 +472,12 @@ class TestImpersonation(TestCase):
 
                 if not use_refer and django_version_loose >= '1.9':
                     self.assertEqual(
-                        use_url_path, response._headers['location'][1]
+                        use_url_path, _get_location(response),
                     )
                 else:
                     self.assertEqual(
                         'http://testserver{0}'.format(use_url_path),
-                        response._headers['location'][1],
+                        _get_location(response),
                     )
 
                 self.assertEqual(self.client.session.get('_impersonate'), None)
