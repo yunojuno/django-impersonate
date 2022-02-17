@@ -3,7 +3,7 @@
 
 Simple application to allow superusers to "impersonate" other non-superuser accounts.
 
-**Version:** 1.7.3
+**Version:** 1.8.1
 
 **Project Links:** [Issues][issues] - [Mailing List][pinbox] -
 [Contributing](#contributing)
@@ -469,6 +469,7 @@ And you should see:
     py310-django3.2: commands succeeded
     py310-django4.0: commands succeeded
     congratulations :)
+
 
 # Contributing
 
