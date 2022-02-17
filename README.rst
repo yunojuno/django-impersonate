@@ -17,13 +17,12 @@ List <https://lists.code.netlandish.com/~petersanchez/public-inbox>`__ -
 Python / Django Support
 =======================
 
--  Python 3.6+ for Django versions 2.2+
+-  Python 3.7+ for Django versions 2.2+
 
-**Note:** As of version 1.4 we are only officially supporting Python
-3.6+ and following the Django support schedule. Meaning we can only
-guarantee support for the Django versions actively supported by the
-Django project. However, older versions of Python and Django should
-continue to work. We just will not guarantee it.
+**Note:** As of version 1.4 we are only officially supporting Python and
+Django versions that are supported by the official projects. So if a
+Python or Django version is End-of-Life'd, then we will no longer
+support that version either.
 
 Dependencies
 ============
