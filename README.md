@@ -488,7 +488,7 @@ list just edit your `.hg/hgrc` file and add the following:
     to = ~petersanchez/public-inbox@lists.code.netlandish.com
 
     [patchbomb]
-    flagtemplate = "django-impersonate"
+    flagtemplate = {separate(' ', 'django-impersonate', flags)}
 
     [diff]
     git = 1
