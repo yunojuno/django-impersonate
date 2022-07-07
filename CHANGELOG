@@ -1,6 +1,15 @@
 Changes
 -------
 
+1.8.1 (2022-02-17)
+
+- Patch version bump for README updates. I know... I'm shameful.
+
+1.8.0 (2022-02-17)
+
+- Adding support for Django 4.0
+- Adding 'default_auto_field' definition. Refs ~petersanchez/django-impersonate#62
+
 1.7.3 (2021-02-05)
 
 Added `impersonator` object to `request.user`
