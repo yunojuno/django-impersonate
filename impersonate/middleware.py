@@ -2,7 +2,7 @@
 from datetime import datetime, timedelta
 
 from django.http import HttpResponseNotAllowed
-from django.shortcuts import redirect
+from django.shortcuts import redirect, reverse
 from django.utils import timezone
 from django.utils.deprecation import MiddlewareMixin
 from django.utils.functional import SimpleLazyObject
@@ -26,6 +26,9 @@ class ImpersonateMiddleware(MiddlewareMixin):
 
         if '_impersonate' in request.session and request.user.is_authenticated:
             if settings.MAX_DURATION:
+                if request.path == reverse('impersonate-stop'):
+                    return
+
                 if '_impersonate_start' not in request.session:
                     return
 
