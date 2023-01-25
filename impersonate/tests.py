@@ -150,6 +150,31 @@ class TestMiddleware(TestCase):
             _impersonate_start=datetime.now(timezone.utc).timestamp()
         )
 
+    @override_settings(IMPERSONATE={'MAX_DURATION': 5, 'REDIRECT_URL': '/foo/'})
+    def test_impersonate_timeout_not_redirect_loop(self):
+        ''' Test to ensure that when MAX_DURATION is reached dont create a redirect loop.
+            See Issue #67
+        '''
+        self._impersonated_request(
+            _impersonate_start=datetime.now(timezone.utc).timestamp()
+        )
+        # new request to see if the redirect to stop
+        request = self.factory.get('/')
+        request.user = self.superuser
+        past_time = datetime.now(timezone.utc) - timedelta(hours=1)
+        request.session = {
+            '_impersonate': self.user,
+            '_impersonate_start': past_time.timestamp(),
+        }
+        request = self.middleware.process_request(request)
+        # Check does the redirect to stop the impersonate
+        self.assertEqual(request.status_code, 302)
+        self.assertEqual(request.url, reverse('impersonate-stop'))
+        # Check impersonate stop redirects to the REDIRECT_URL
+        request = self.client.get(reverse('impersonate-stop'))
+        self.assertEqual(request.status_code, 302)
+        self.assertEqual(request.url, '/foo/')
+
     @override_settings(IMPERSONATE={'MAX_DURATION': 3600})
     def test_reject_without_start_time(self):
         ''' Test to ensure that requests without a start time
