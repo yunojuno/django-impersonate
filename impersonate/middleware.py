@@ -50,8 +50,8 @@ class ImpersonateMiddleware(MiddlewareMixin):
             except User.DoesNotExist:
                 return
 
-            if settings.READ_ONLY and request.method not in ['GET', 'HEAD']:
-                return HttpResponseNotAllowed(['GET', 'HEAD'])
+            if settings.READ_ONLY and request.method not in ['GET', 'HEAD', 'OPTIONS']:
+                return HttpResponseNotAllowed(['GET', 'HEAD', 'OPTIONS'])
 
             if check_allow_for_user(request, new_user) and check_allow_for_uri(
                 request.path

@@ -828,6 +828,8 @@ class TestImpersonation(TestCase):
         self.assertTrue(model_admin.has_change_permission(request))
         request.method = 'HEAD'
         self.assertTrue(model_admin.has_change_permission(request))
+        request.method = 'OPTIONS'
+        self.assertTrue(model_admin.has_change_permission(request))
         request.method = 'POST'
         self.assertFalse(model_admin.has_change_permission(request))
 
@@ -842,5 +844,11 @@ class TestImpersonation(TestCase):
     @override_settings(IMPERSONATE={'READ_ONLY': True})
     def test_impersonate_read_only(self):
         self._impersonate_helper('user1', 'foobar', 4)
-        resp = self.client.post('/not/real/url/')
+        resp = self.client.post(reverse('impersonate-test'))
         self.assertEqual(resp.status_code, 405)
+        resp = self.client.get(reverse('impersonate-test'))
+        self.assertEqual(resp.status_code, 200)
+        resp = self.client.head(reverse('impersonate-test'))
+        self.assertEqual(resp.status_code, 200)
+        resp = self.client.options(reverse('impersonate-test'))
+        self.assertEqual(resp.status_code, 200)

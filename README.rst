@@ -272,9 +272,9 @@ present. Value should be a string containing the redirect path.
    READ_ONLY
 
 A boolean that if set to ``True`` any requests that are not either
-``GET`` or ``HEAD`` will result in a "Bad Request" response (status code
-405). Use this if you want to limit your impersonating users to read
-only impersonation sessions.
+``GET`` or ``HEAD`` or ``OPTIONS`` will result in a "Bad Request"
+response (status code 405). Use this if you want to limit your
+impersonating users to read only impersonation sessions.
 
 Value should be a boolean, defaults to ``False``
 
