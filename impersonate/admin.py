@@ -176,7 +176,7 @@ class ImpersonationLogAdmin(admin.ModelAdmin):
     # `return False` hides impersonates module in admin page
     def has_change_permission(self, request, obj=None):
         if settings.ADMIN_READ_ONLY:
-            return request.method in ['GET', 'HEAD']
+            return request.method in ['GET', 'HEAD', 'OPTIONS']
         return True
 
 
