@@ -128,3 +128,14 @@ def check_allow_for_uri(uri):
         if re.search(exclusion, uri):
             return False
     return True
+
+
+def check_read_only(request):
+    ''' Returns True if can only do read only requests.
+        Uses the CUSTOM_READ_ONLY function if required, else
+        looks at the READ_ONLY setting.
+    '''
+    if settings.CUSTOM_READ_ONLY is not None:
+        custom_read_only_func = import_func_from_string(settings.CUSTOM_READ_ONLY)
+        return custom_read_only_func(request)
+    return settings.READ_ONLY
