@@ -89,6 +89,13 @@ def test_qs(request):
     return User.objects.all().order_by('pk')
 
 
+def test_allow_read_only(request):
+    ''' Used via the IMPERSONATE['CUSTOM_READ_ONLY'] setting.
+        Simple check that the user is not a superuser.
+    '''
+    return not request.user.is_superuser
+
+
 class UserFactory(object):
     @staticmethod
     def create(**kwargs):
@@ -852,3 +859,29 @@ class TestImpersonation(TestCase):
         self.assertEqual(resp.status_code, 200)
         resp = self.client.options(reverse('impersonate-test'))
         self.assertEqual(resp.status_code, 200)
+
+    @override_settings(IMPERSONATE={'CUSTOM_READ_ONLY': 'impersonate.tests.test_allow_read_only'})
+    def test_impersonate_custom_read_only(self):
+        # superuser is able to do all requests
+        self._impersonate_helper('user1', 'foobar', 4)
+        resp = self.client.post(reverse('impersonate-test'))
+        self.assertEqual(resp.status_code, 200)
+        resp = self.client.get(reverse('impersonate-test'))
+        self.assertEqual(resp.status_code, 200)
+        resp = self.client.head(reverse('impersonate-test'))
+        self.assertEqual(resp.status_code, 200)
+        resp = self.client.options(reverse('impersonate-test'))
+        self.assertEqual(resp.status_code, 200)
+        self.client.logout()
+
+        # staff user is only able to do read only requests
+        self._impersonate_helper('user3', 'foobar', 4)
+        resp = self.client.post(reverse('impersonate-test'))
+        self.assertEqual(resp.status_code, 405)
+        resp = self.client.get(reverse('impersonate-test'))
+        self.assertEqual(resp.status_code, 200)
+        resp = self.client.head(reverse('impersonate-test'))
+        self.assertEqual(resp.status_code, 200)
+        resp = self.client.options(reverse('impersonate-test'))
+        self.assertEqual(resp.status_code, 200)
+        self.client.logout()

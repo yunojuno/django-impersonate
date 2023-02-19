@@ -7,7 +7,7 @@ from django.utils import timezone
 from django.utils.deprecation import MiddlewareMixin
 from django.utils.functional import SimpleLazyObject
 
-from .helpers import User, check_allow_for_uri, check_allow_for_user
+from .helpers import User, check_allow_for_uri, check_allow_for_user, check_read_only
 from .settings import settings
 
 
@@ -50,7 +50,7 @@ class ImpersonateMiddleware(MiddlewareMixin):
             except User.DoesNotExist:
                 return
 
-            if settings.READ_ONLY and request.method not in ['GET', 'HEAD', 'OPTIONS']:
+            if check_read_only(request) and request.method not in ['GET', 'HEAD', 'OPTIONS']:
                 return HttpResponseNotAllowed(['GET', 'HEAD', 'OPTIONS'])
 
             if check_allow_for_user(request, new_user) and check_allow_for_uri(
