@@ -82,8 +82,10 @@ Use
 ===
 
 #. Add ``impersonate`` to your INSTALLED_APPS
+
 #. Add ``impersonate.middleware.ImpersonateMiddleware`` to your
    ``MIDDLEWARE`` setting.
+
 #. Add ``impersonate.urls`` somewhere in your url structure. Example:
 
    ::
@@ -277,6 +279,22 @@ response (status code 405). Use this if you want to limit your
 impersonating users to read only impersonation sessions.
 
 Value should be a boolean, defaults to ``False``
+
+If the ``CUSTOM_READ_ONLY`` is set, then that custom function is used,
+and this setting is ignored.
+
+::
+
+   CUSTOM_READ_ONLY
+
+A string that represents a function (e.g.
+``module.submodule.mod.function_name``) that allows more fine grained
+control over who has read only access. It takes one argument, the
+request object, and should return True to restrict the user to only
+allow ``GET``, ``HEAD`` and ``OPTIONS`` requests.
+
+It is optional, and if it is not present, ``READ_ONLY`` setting value
+applies.
 
 ::
 

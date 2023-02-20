@@ -1,7 +1,7 @@
 Changes
 -------
 
-1.9.0 (unreleased)
+1.9.0 (2023-02-20)
 
 - Prevent redirect loop when MAX_DURATION is used. Refs ~petersanchez/django-impersonate#67
 - Allow OPTIONS requests when READ_ONLY is True. Refs ~petersanchez/django-impersonate#69
