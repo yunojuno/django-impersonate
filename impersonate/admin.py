@@ -5,14 +5,10 @@ from django.contrib import admin
 from django.db.utils import NotSupportedError
 from django.utils.html import format_html
 
+from .compat import reverse
 from .helpers import User, check_allow_impersonate
 from .models import ImpersonationLog
 from .settings import settings
-
-try:
-    from django.urls import reverse
-except ImportError:
-    from django.core.urlresolvers import reverse
 
 logger = logging.getLogger(__name__)
 

@@ -8,8 +8,12 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from .decorators import allowed_user_required
 from .helpers import (
-    check_allow_for_user, get_paginator, get_redir_arg, get_redir_field,
-    get_redir_path, users_impersonable,
+    check_allow_for_user,
+    get_paginator,
+    get_redir_arg,
+    get_redir_field,
+    get_redir_path,
+    users_impersonable,
 )
 from .settings import User, settings
 from .signals import session_begin, session_end

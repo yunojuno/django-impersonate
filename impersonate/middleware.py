@@ -2,10 +2,11 @@
 from datetime import datetime, timedelta, timezone
 
 from django.http import HttpResponseNotAllowed
-from django.shortcuts import redirect, reverse
+from django.shortcuts import redirect
 from django.utils.deprecation import MiddlewareMixin
 from django.utils.functional import SimpleLazyObject
 
+from .compat import reverse
 from .helpers import User, check_allow_for_uri, check_allow_for_user, check_read_only
 from .settings import settings
 

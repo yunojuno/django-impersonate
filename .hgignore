@@ -6,6 +6,8 @@ settings_local.py
 **.pyc
 MANIFEST
 .idea
+.venv
+*.egg-info
 
 syntax:regexp
 ^htmlcov$

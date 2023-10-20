@@ -35,16 +35,14 @@ from django.urls import include, path
 from django.utils.duration import duration_string
 
 from .admin import (
-    ImpersonationLogAdmin, ImpersonatorFilter, SessionStateFilter,
+    ImpersonationLogAdmin,
+    ImpersonatorFilter,
+    SessionStateFilter,
 )
+from .compat import reverse
 from .helpers import users_impersonable
 from .models import ImpersonationLog
 from .signals import session_begin, session_end
-
-try:
-    from django.urls import reverse
-except ImportError:
-    from django.core.urlresolvers import reverse
 
 User = get_user_model()
 django_version_loose = LooseVersion(django.get_version())
@@ -725,9 +723,16 @@ class TestImpersonation(TestCase):
         qs = _filter.queryset(None, ImpersonationLog.objects.all())
         self.assertEqual(qs.count(), 2)
 
+        def _format_params(val):
+            # Django 5.x returns request querystring params as a list
+            # https://github.com/django/django/commit/d03dc63177ad3ba6e685e314eed45d6a8ec5cb0c
+            if django_version_loose >= '5.0':
+                return {'session': [val]}
+            return {'session': val}
+
         _filter = SessionStateFilter(
             None,
-            {'session': 'complete'},
+            _format_params('complete'),
             ImpersonationLog,
             ImpersonationLogAdmin,
         )
@@ -736,7 +741,7 @@ class TestImpersonation(TestCase):
 
         _filter = SessionStateFilter(
             None,
-            {'session': 'incomplete'},
+            _format_params('incomplete'),
             ImpersonationLog,
             ImpersonationLogAdmin,
         )
